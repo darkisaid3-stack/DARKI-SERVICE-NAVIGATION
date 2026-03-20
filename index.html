@@ -1,1 +1,2644 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DARKI SERVICES — Marketplace de Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════
+   TOKENS
+═══════════════════════════════════ */
+:root{
+  --p:#0F172A; --g:#22C55E; --g2:#16A34A; --b:#38BDF8;
+  --bg:#F8FAFC; --bg2:#F1F5F9; --card:#fff;
+  --border:#E2E8F0; --muted:#94A3B8;
+  --text:#1E293B; --text2:#64748B;
+  --err:#EF4444; --warn:#F59E0B; --ok:#22C55E;
+  --r:14px; --r2:22px; --r3:999px;
+  --sh:0 2px 16px rgba(15,23,42,.07);
+  --sh2:0 8px 40px rgba(15,23,42,.13);
+  --tr:.22s cubic-bezier(.4,0,.2,1);
+  --nav-h:68px;
+}
+[data-dark]{
+  --bg:#0F172A; --bg2:#1E293B; --card:#1E293B;
+  --border:#334155; --muted:#475569;
+  --text:#F1F5F9; --text2:#94A3B8;
+  --sh:0 2px 16px rgba(0,0,0,.3);
+  --sh2:0 8px 40px rgba(0,0,0,.5);
+}
 
+/* ═══════════════════════════════════
+   RESET
+═══════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;min-height:100vh;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none}
+input,textarea,select{font-family:inherit;outline:none;border:none}
+img{display:block;max-width:100%}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* ═══════════════════════════════════
+   PAGE ENGINE — TRANSITION SYSTEM
+═══════════════════════════════════ */
+.page{
+  display:none;opacity:0;transform:translateY(16px);
+  transition:opacity .35s var(--tr), transform .35s var(--tr);
+  min-height:calc(100vh - var(--nav-h));
+}
+.page.active{
+  display:block;
+  animation:pageIn .38s cubic-bezier(.4,0,.2,1) forwards;
+}
+.page.exit{
+  animation:pageOut .25s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes pageIn{
+  from{opacity:0;transform:translateY(18px) scale(.99)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes pageOut{
+  from{opacity:1;transform:translateY(0)}
+  to{opacity:0;transform:translateY(-12px)}
+}
+
+/* ═══════════════════════════════════
+   NAV
+═══════════════════════════════════ */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 5vw;
+  background:rgba(248,250,252,.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:background .3s,border-color .3s;
+}
+[data-dark] .nav{background:rgba(15,23,42,.92)}
+.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.logo-icon{
+  width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,var(--g),var(--b));
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.logo-name{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.logo-name span{color:var(--g)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{
+  padding:8px 14px;border-radius:10px;font-size:14px;font-weight:500;
+  color:var(--text2);cursor:pointer;transition:var(--tr);user-select:none;
+}
+.nav-link:hover{background:var(--bg2);color:var(--text)}
+.nav-link.active{background:rgba(34,197,94,.1);color:var(--g);font-weight:600}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.nav-user{
+  display:none;align-items:center;gap:10px;
+}
+.nav-user.visible{display:flex}
+.nav-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--g),var(--b));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:#fff;cursor:pointer;
+  transition:var(--tr);
+}
+.nav-avatar:hover{transform:scale(1.08)}
+.nav-username{font-size:14px;font-weight:600;color:var(--text)}
+.theme-btn{
+  width:36px;height:36px;border-radius:10px;
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;transition:var(--tr);color:var(--text2);
+  background:var(--card);
+}
+.theme-btn:hover{background:var(--bg2)}
+.hamburger{
+  display:none;width:36px;height:36px;border-radius:10px;
+  border:1px solid var(--border);background:var(--card);
+  flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  cursor:pointer;
+}
+.hamburger span{width:18px;height:2px;background:var(--text);border-radius:2px;transition:var(--tr)}
+
+/* ═══════════════════════════════════
+   BUTTONS
+═══════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 22px;border-radius:var(--r);font-size:14px;font-weight:600;
+  cursor:pointer;transition:var(--tr);white-space:nowrap;user-select:none;
+  border:none;font-family:inherit;
+}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--g);color:#fff;box-shadow:0 2px 14px rgba(34,197,94,.32)}
+.btn-primary:hover{background:var(--g2);box-shadow:0 4px 22px rgba(34,197,94,.42);transform:translateY(-1px)}
+.btn-dark{background:var(--p);color:#fff}
+.btn-dark:hover{opacity:.88;transform:translateY(-1px)}
+[data-dark] .btn-dark{background:#334155}
+.btn-ghost{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--bg2);border-color:var(--muted)}
+.btn-outline{background:transparent;color:var(--g);border:1.5px solid var(--g)}
+.btn-outline:hover{background:rgba(34,197,94,.08)}
+.btn-danger{background:var(--err);color:#fff}
+.btn-danger:hover{opacity:.88}
+.btn-lg{padding:14px 32px;font-size:15px;border-radius:var(--r2)}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:10px}
+.btn-icon{padding:10px;border-radius:11px}
+.btn-block{width:100%;justify-content:center}
+
+/* ═══════════════════════════════════
+   FORM SYSTEM
+═══════════════════════════════════ */
+.form-group{margin-bottom:18px;position:relative}
+.form-label{
+  display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px;
+}
+.form-label .req{color:var(--err);margin-left:3px}
+.form-input{
+  width:100%;padding:12px 16px;
+  background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:var(--r);font-size:14px;color:var(--text);
+  transition:var(--tr);
+}
+.form-input:focus{border-color:var(--g);background:var(--card);box-shadow:0 0 0 3px rgba(34,197,94,.12)}
+.form-input.error{border-color:var(--err);background:rgba(239,68,68,.04)}
+.form-input.error:focus{box-shadow:0 0 0 3px rgba(239,68,68,.12)}
+.form-input.success{border-color:var(--ok)}
+.form-input::placeholder{color:var(--muted)}
+.form-error{font-size:12px;color:var(--err);margin-top:5px;display:none;align-items:center;gap:4px}
+.form-error.show{display:flex}
+.form-hint{font-size:12px;color:var(--text2);margin-top:5px}
+.input-wrap{position:relative}
+.input-icon{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  font-size:15px;color:var(--muted);pointer-events:none;
+}
+.input-icon + .form-input{padding-left:42px}
+.input-toggle{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  font-size:14px;color:var(--muted);cursor:pointer;padding:4px;
+}
+.form-select{
+  width:100%;padding:12px 16px;
+  background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:var(--r);font-size:14px;color:var(--text);
+  cursor:pointer;appearance:none;transition:var(--tr);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+}
+.form-select:focus{border-color:var(--g);outline:none}
+.form-textarea{resize:vertical;min-height:100px}
+.strength-bar{height:4px;border-radius:2px;background:var(--bg2);margin-top:8px;overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;transition:width .4s,background .4s;width:0}
+
+/* ═══════════════════════════════════
+   CARD
+═══════════════════════════════════ */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);box-shadow:var(--sh);
+  transition:var(--tr);
+}
+.card:hover{box-shadow:var(--sh2)}
+.card-body{padding:24px}
+.card-header{padding:20px 24px 0;margin-bottom:20px}
+.card-footer{padding:16px 24px;border-top:1px solid var(--border);margin-top:16px}
+
+/* ═══════════════════════════════════
+   ALERTS & TOASTS
+═══════════════════════════════════ */
+.alert{
+  padding:14px 18px;border-radius:var(--r);font-size:14px;
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.alert-success{background:rgba(34,197,94,.1);color:var(--g);border:1px solid rgba(34,197,94,.2)}
+.alert-error{background:rgba(239,68,68,.08);color:var(--err);border:1px solid rgba(239,68,68,.2)}
+.alert-info{background:rgba(56,189,248,.08);color:var(--b);border:1px solid rgba(56,189,248,.2)}
+
+/* Toast container */
+#toast-container{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  display:flex;flex-direction:column;gap:10px;pointer-events:none;
+}
+.toast{
+  background:var(--p);color:#fff;padding:12px 18px;border-radius:14px;
+  font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.25);pointer-events:all;
+  animation:toastIn .35s cubic-bezier(.34,1.56,.64,1) both;
+  max-width:320px;
+}
+.toast.removing{animation:toastOut .25s ease forwards}
+[data-dark] .toast{background:#334155}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(40px)}}
+.toast-icon{font-size:16px;flex-shrink:0}
+.toast-close{margin-left:auto;opacity:.6;cursor:pointer;font-size:14px}
+.toast-close:hover{opacity:1}
+
+/* ═══════════════════════════════════
+   BADGE & TAGS
+═══════════════════════════════════ */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:var(--r3);font-size:12px;font-weight:600;
+}
+.badge-green{background:rgba(34,197,94,.1);color:var(--g)}
+.badge-blue{background:rgba(56,189,248,.1);color:var(--b)}
+.badge-orange{background:rgba(245,158,11,.1);color:var(--warn)}
+.badge-red{background:rgba(239,68,68,.1);color:var(--err)}
+.badge-gray{background:var(--bg2);color:var(--text2)}
+
+/* ═══════════════════════════════════
+   DIVIDER
+═══════════════════════════════════ */
+.divider{
+  display:flex;align-items:center;gap:12px;margin:20px 0;
+}
+.divider-line{flex:1;height:1px;background:var(--border)}
+.divider-text{font-size:13px;color:var(--muted);white-space:nowrap}
+
+/* ═══════════════════════════════════
+   OVERLAY / MODAL
+═══════════════════════════════════ */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:800;backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.overlay.open{display:flex;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--card);border-radius:var(--r2);
+  box-shadow:0 24px 80px rgba(0,0,0,.25);
+  width:100%;max-width:460px;
+  animation:modalIn .35s cubic-bezier(.34,1.2,.64,1) both;
+  overflow:hidden;
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:none}}
+.modal-header{
+  padding:22px 24px 0;display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-size:18px;font-weight:700}
+.modal-close{
+  width:32px;height:32px;border-radius:9px;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-size:14px;transition:var(--tr);color:var(--text2);
+}
+.modal-close:hover{background:var(--border);color:var(--text)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:0 24px 22px;display:flex;gap:10px;justify-content:flex-end}
+
+/* ═══════════════════════════════════
+   LOADING SPINNER
+═══════════════════════════════════ */
+.spinner{
+  width:20px;height:20px;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.35);
+  border-top-color:#fff;
+  animation:spin .7s linear infinite;display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{
+  position:fixed;inset:0;background:rgba(248,250,252,.8);
+  z-index:999;display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+[data-dark] .loading-overlay{background:rgba(15,23,42,.8)}
+.loading-overlay.show{display:flex}
+.loading-box{
+  background:var(--card);border-radius:var(--r2);padding:32px 40px;
+  text-align:center;box-shadow:var(--sh2);
+}
+.loading-spinner-lg{
+  width:44px;height:44px;border-radius:50%;
+  border:3px solid var(--bg2);border-top-color:var(--g);
+  animation:spin .8s linear infinite;margin:0 auto 16px;
+}
+.loading-text{font-size:14px;color:var(--text2);font-weight:500}
+
+/* ═══════════════════════════════════
+   PAGE CONTAINER
+═══════════════════════════════════ */
+.page-wrap{
+  max-width:1200px;margin:0 auto;padding:0 5vw;
+  padding-top:calc(var(--nav-h) + 40px);padding-bottom:80px;
+}
+.page-wrap-full{padding-top:var(--nav-h)}
+.page-center{
+  min-height:calc(100vh - var(--nav-h));
+  display:flex;align-items:center;justify-content:center;
+  padding:40px 5vw;
+}
+
+/* ═══════════════════════════════════
+   ── PAGE: HOME ──
+═══════════════════════════════════ */
+.hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:0 5vw;position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 60% at 80% 30%,rgba(56,189,248,.1) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 50% at 10% 70%,rgba(34,197,94,.07) 0%,transparent 55%);
+}
+.hero-dots{
+  position:absolute;inset:0;z-index:0;opacity:.035;
+  background-image:radial-gradient(circle, var(--text) 1px, transparent 1px);
+  background-size:32px 32px;
+}
+.hero-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);
+  border-radius:var(--r3);padding:6px 14px;
+  font-size:13px;font-weight:600;color:var(--g);margin-bottom:22px;
+}
+.badge-pulse{width:7px;height:7px;border-radius:50%;background:var(--g);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hero-title{
+  font-size:clamp(2.2rem,4.5vw,3.8rem);font-weight:800;
+  line-height:1.13;letter-spacing:-.03em;margin-bottom:20px;
+}
+.hero-hl{
+  background:linear-gradient(135deg,var(--g),var(--b));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{font-size:17px;color:var(--text2);line-height:1.7;margin-bottom:36px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:28px;margin-top:44px;flex-wrap:wrap}
+.hero-stat{}
+.h-stat-num{font-size:26px;font-weight:800}
+.h-stat-label{font-size:13px;color:var(--text2)}
+.hero-divider{width:1px;background:var(--border)}
+
+/* Hero visual */
+.hero-visual{position:relative;display:flex;justify-content:center}
+.hero-phone{
+  width:260px;background:var(--card);border-radius:38px;
+  border:6px solid rgba(15,23,42,.15);
+  box-shadow:0 32px 64px rgba(0,0,0,.2),inset 0 0 0 1px rgba(255,255,255,.1);
+  overflow:hidden;position:relative;z-index:1;
+}
+[data-dark] .hero-phone{border-color:rgba(255,255,255,.1)}
+.phone-notch{height:24px;background:var(--p);display:flex;align-items:center;justify-content:center}
+.phone-pill{width:72px;height:8px;background:#000;border-radius:99px}
+.phone-screen{
+  background:var(--bg);padding:14px;
+  background:linear-gradient(135deg,var(--bg),var(--bg2));
+}
+.app-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.app-greet{font-size:11px;font-weight:700;color:var(--text)}
+.app-ava{width:28px;height:28px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.app-search-mini{
+  background:var(--card);border-radius:10px;padding:8px 12px;
+  display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted);
+  box-shadow:var(--sh);margin-bottom:12px;
+}
+.mini-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.mini-cat{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:var(--card);border-radius:10px;padding:6px 2px;
+  box-shadow:var(--sh);
+}
+.mc-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.mc-label{font-size:8px;font-weight:600;color:var(--text2)}
+.mini-prov{
+  display:flex;gap:8px;background:var(--card);border-radius:10px;
+  padding:8px;box-shadow:var(--sh);margin-bottom:6px;align-items:center;
+}
+.mp-ava{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.mp-info{flex:1;min-width:0}
+.mp-name{font-size:10px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-job{font-size:8px;color:var(--text2)}
+.mp-rating{font-size:8px;color:var(--g);font-weight:600}
+.hero-float{
+  position:absolute;background:var(--card);border-radius:14px;
+  box-shadow:var(--sh2);padding:9px 13px;
+  display:flex;align-items:center;gap:8px;
+  border:1px solid var(--border);animation:float 3.5s ease-in-out infinite;
+  z-index:2;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero-float.f1{top:60px;right:-10px}
+.hero-float.f2{bottom:100px;left:-20px;animation-delay:-1.7s}
+.fl-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.fl-t{font-size:11px;font-weight:700;color:var(--text)}
+.fl-s{font-size:9px;color:var(--text2)}
+.hero-glow{
+  position:absolute;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,197,94,.15),transparent 70%);
+  filter:blur(40px);z-index:0;
+}
+
+/* Section headers */
+.sec-tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g);margin-bottom:12px}
+.sec-title{font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:14px}
+.sec-sub{font-size:16px;color:var(--text2);line-height:1.7;max-width:520px}
+
+/* Category cards */
+.section-pad{padding:80px 5vw}
+.cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:44px}
+.cat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:22px 18px;cursor:pointer;transition:var(--tr);
+  display:flex;flex-direction:column;gap:10px;
+}
+.cat-card:hover{transform:translateY(-4px);box-shadow:var(--sh2);border-color:rgba(34,197,94,.28)}
+.cat-card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.cat-card-name{font-size:14px;font-weight:700}
+.cat-card-count{font-size:12px;color:var(--text2)}
+.cat-card-arrow{color:var(--muted);font-size:14px;margin-top:auto}
+
+/* How it works */
+.how-dark{background:var(--p)}
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:28px;margin-top:44px}
+.how-card{text-align:center}
+.how-step{width:52px;height:52px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px}
+.how-num{width:22px;height:22px;border-radius:50%;background:var(--g);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px}
+.how-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
+.how-desc{font-size:14px;color:rgba(255,255,255,.55);line-height:1.7}
+
+/* Providers grid */
+.provs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-top:44px}
+.prov-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  overflow:hidden;cursor:pointer;transition:var(--tr);
+}
+.prov-card:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
+.prov-top{
+  height:90px;display:flex;align-items:center;justify-content:center;
+  font-size:44px;position:relative;
+}
+.prov-verified{position:absolute;top:10px;right:10px;background:var(--g);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+.prov-body{padding:16px}
+.prov-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.prov-job{font-size:13px;color:var(--text2);margin-bottom:10px}
+.prov-meta{display:flex;justify-content:space-between;align-items:center}
+.prov-stars{font-size:13px}
+.prov-price{font-size:13px;font-weight:700;color:var(--g)}
+.prov-foot{border-top:1px solid var(--border);padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+.prov-city{font-size:12px;color:var(--text2)}
+.prov-book-btn{font-size:12px;font-weight:600;color:var(--g);background:rgba(34,197,94,.1);padding:5px 12px;border-radius:8px;cursor:pointer;transition:var(--tr)}
+.prov-book-btn:hover{background:rgba(34,197,94,.2)}
+
+/* CTA banner */
+.cta-banner{
+  background:linear-gradient(135deg,var(--p),#1E3A5F);
+  border-radius:var(--r2);padding:52px 48px;
+  display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;
+  position:relative;overflow:hidden;
+}
+.cta-banner::before{
+  content:'';position:absolute;right:-80px;top:-80px;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,197,94,.15),transparent 70%);
+}
+.cta-banner-text{position:relative;z-index:1}
+.cta-banner-title{font-size:28px;font-weight:800;color:#fff;margin-bottom:8px}
+.cta-banner-sub{font-size:15px;color:rgba(255,255,255,.6)}
+.cta-banner-btns{display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:1}
+
+/* ═══════════════════════════════════
+   ── PAGE: SERVICES ──
+═══════════════════════════════════ */
+.services-header{margin-bottom:40px}
+.services-search{
+  display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap;
+}
+.service-search-input{
+  flex:1;min-width:220px;padding:12px 18px;
+  background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);
+  font-size:14px;color:var(--text);transition:var(--tr);
+}
+.service-search-input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+.service-search-input::placeholder{color:var(--muted)}
+.services-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px}
+.filter-chip{
+  padding:8px 16px;border-radius:var(--r3);font-size:13px;font-weight:500;
+  border:1.5px solid var(--border);cursor:pointer;transition:var(--tr);color:var(--text2);
+  background:var(--card);
+}
+.filter-chip:hover{border-color:var(--g);color:var(--g)}
+.filter-chip.active{background:var(--g);color:#fff;border-color:var(--g)}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.service-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  overflow:hidden;cursor:pointer;transition:var(--tr);
+}
+.service-card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.service-img{
+  height:120px;display:flex;align-items:center;justify-content:center;
+  font-size:52px;
+}
+.service-body{padding:18px}
+.service-name{font-size:16px;font-weight:700;margin-bottom:6px}
+.service-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.service-meta{display:flex;justify-content:space-between;align-items:center}
+.service-price-range{font-size:14px;font-weight:700;color:var(--g)}
+.service-providers-count{font-size:12px;color:var(--text2)}
+
+/* ═══════════════════════════════════
+   ── PAGE: LOGIN / REGISTER ──
+═══════════════════════════════════ */
+.auth-wrap{
+  min-height:calc(100vh - var(--nav-h));
+  display:flex;align-items:center;justify-content:center;
+  padding:40px 20px;padding-top:calc(var(--nav-h) + 20px);
+}
+.auth-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:40px;width:100%;max-width:440px;
+  box-shadow:var(--sh2);
+  animation:pageIn .4s ease both;
+}
+.auth-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px}
+.auth-title{font-size:22px;font-weight:800;text-align:center;margin-bottom:6px}
+.auth-sub{font-size:14px;color:var(--text2);text-align:center;margin-bottom:28px}
+.social-btn{
+  width:100%;padding:11px;border-radius:var(--r);
+  border:1.5px solid var(--border);background:var(--card);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:14px;font-weight:500;cursor:pointer;transition:var(--tr);color:var(--text);
+  margin-bottom:10px;font-family:inherit;
+}
+.social-btn:hover{background:var(--bg2);border-color:var(--muted)}
+.auth-footer{text-align:center;margin-top:20px;font-size:14px;color:var(--text2)}
+.auth-footer a{color:var(--g);font-weight:600;cursor:pointer}
+.auth-footer a:hover{text-decoration:underline}
+
+/* ═══════════════════════════════════
+   ── PAGE: PROFILE ──
+═══════════════════════════════════ */
+.profile-grid{display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:start}
+.profile-sidebar{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);overflow:hidden;
+}
+.profile-cover{
+  height:100px;
+  background:linear-gradient(135deg,var(--p),#1E3A5F);
+  position:relative;
+}
+.profile-ava{
+  position:absolute;bottom:-28px;left:24px;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--g),var(--b));
+  border:3px solid var(--card);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:700;color:#fff;
+}
+.profile-info{padding:44px 24px 22px}
+.profile-name-big{font-size:18px;font-weight:800;margin-bottom:3px}
+.profile-email{font-size:13px;color:var(--text2);margin-bottom:14px}
+.profile-stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:8px;margin-bottom:18px;
+}
+.ps-item{text-align:center;padding:10px;background:var(--bg2);border-radius:10px}
+.ps-num{font-size:18px;font-weight:800}
+.ps-label{font-size:10px;color:var(--text2)}
+.profile-menu{border-top:1px solid var(--border)}
+.pmenu-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 24px;font-size:14px;cursor:pointer;transition:var(--tr);
+  border-bottom:1px solid var(--border);
+}
+.pmenu-item:last-child{border-bottom:none}
+.pmenu-item:hover{background:var(--bg2)}
+.pmenu-item.active-menu{background:rgba(34,197,94,.05);color:var(--g)}
+.pmenu-left{display:flex;align-items:center;gap:10px}
+.pmenu-icon{font-size:16px;width:20px;text-align:center}
+.pmenu-chevron{font-size:12px;color:var(--muted)}
+.profile-content{display:flex;flex-direction:column;gap:20px}
+
+/* Profile sections */
+.profile-section{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:24px;
+}
+.ps-title{font-size:16px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.ps-title span{font-size:18px}
+.info-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:13px;color:var(--text2)}
+.info-value{font-size:14px;font-weight:500;color:var(--text)}
+.info-edit{font-size:12px;color:var(--g);cursor:pointer;font-weight:600}
+.order-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;border-bottom:1px solid var(--border);
+}
+.order-item:last-child{border-bottom:none}
+.order-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.order-info{flex:1}
+.order-name{font-size:14px;font-weight:600}
+.order-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.order-amount{font-size:14px;font-weight:700;color:var(--g)}
+
+/* ═══════════════════════════════════
+   ── PAGE: CONTACT ──
+═══════════════════════════════════ */
+.contact-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:48px;align-items:start}
+.contact-info{display:flex;flex-direction:column;gap:20px}
+.contact-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:22px;
+  display:flex;align-items:flex-start;gap:14px;transition:var(--tr);
+}
+.contact-card:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.cc-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+}
+.cc-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.cc-val{font-size:13px;color:var(--text2);line-height:1.6}
+.contact-form-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:32px;box-shadow:var(--sh);
+}
+.contact-form-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.contact-form-sub{font-size:14px;color:var(--text2);margin-bottom:28px}
+
+/* ═══════════════════════════════════
+   ── PAGE: BOOKING ──
+═══════════════════════════════════ */
+.booking-layout{display:grid;grid-template-columns:1fr 380px;gap:28px;align-items:start}
+.booking-steps{
+  display:flex;align-items:center;gap:0;margin-bottom:36px;
+}
+.bstep{
+  display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;
+  position:relative;
+}
+.bstep::after{
+  content:'';position:absolute;right:-50%;top:16px;
+  width:100%;height:2px;background:var(--border);z-index:0;
+}
+.bstep:last-child::after{display:none}
+.bstep.done::after{background:var(--g)}
+.bstep-num{
+  width:32px;height:32px;border-radius:50%;
+  border:2px solid var(--border);background:var(--card);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--muted);z-index:1;
+  transition:var(--tr);
+}
+.bstep.active .bstep-num{border-color:var(--g);color:var(--g);background:rgba(34,197,94,.08)}
+.bstep.done .bstep-num{border-color:var(--g);background:var(--g);color:#fff}
+.bstep-label{font-size:11px;font-weight:600;color:var(--muted)}
+.bstep.active .bstep-label{color:var(--g)}
+.bstep.done .bstep-label{color:var(--text2)}
+.booking-form{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:28px;
+}
+.booking-form-title{font-size:17px;font-weight:700;margin-bottom:20px}
+.booking-summary{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:24px;position:sticky;top:calc(var(--nav-h) + 20px);
+}
+.bs-title{font-size:15px;font-weight:700;margin-bottom:16px}
+.bs-provider{display:flex;gap:12px;align-items:center;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.bs-prov-ava{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.bs-prov-name{font-size:14px;font-weight:700}
+.bs-prov-job{font-size:12px;color:var(--text2)}
+.bs-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.bs-row:last-of-type{border-bottom:none}
+.bs-label{color:var(--text2)}
+.bs-val{font-weight:600}
+.bs-total{display:flex;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:2px solid var(--border);font-size:15px;font-weight:700}
+.bs-total-val{color:var(--g)}
+
+/* Map placeholder */
+.map-placeholder{
+  height:180px;background:linear-gradient(135deg,#E8F5E9,#E3F2FD);
+  border-radius:var(--r);display:flex;align-items:center;justify-content:center;
+  font-size:48px;border:1.5px dashed var(--border);cursor:pointer;
+  transition:var(--tr);position:relative;overflow:hidden;
+}
+.map-placeholder:hover{border-color:var(--g)}
+[data-dark] .map-placeholder{background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(56,189,248,.08))}
+.map-pin-anim{position:absolute;font-size:32px;animation:bouncePin 2s ease-in-out infinite}
+@keyframes bouncePin{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* Payment */
+.payment-methods{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.payment-method{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:var(--r);border:1.5px solid var(--border);
+  cursor:pointer;transition:var(--tr);
+}
+.payment-method:hover{border-color:var(--g)}
+.payment-method.selected{border-color:var(--g);background:rgba(34,197,94,.05)}
+.pm-icon{font-size:22px}
+.pm-info{flex:1}
+.pm-name{font-size:14px;font-weight:600}
+.pm-desc{font-size:12px;color:var(--text2)}
+.pm-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);position:relative;flex-shrink:0;transition:var(--tr)}
+.payment-method.selected .pm-radio{border-color:var(--g)}
+.payment-method.selected .pm-radio::after{content:'';position:absolute;inset:3px;background:var(--g);border-radius:50%}
+
+/* ═══════════════════════════════════
+   ── PAGE: PROVIDER DASHBOARD ──
+═══════════════════════════════════ */
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.dash-kpi{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:20px;transition:var(--tr);
+}
+.dash-kpi:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.dk-label{font-size:12px;color:var(--text2);margin-bottom:8px}
+.dk-value{font-size:26px;font-weight:800}
+.dk-change{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:4px}
+.dk-up{color:var(--ok)}.dk-down{color:var(--err)}
+.dashboard-bottom{display:grid;grid-template-columns:1.5fr 1fr;gap:20px}
+.dash-section{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:20px;
+}
+.dash-section-title{font-size:14px;font-weight:700;margin-bottom:16px}
+.chart-wrap{height:120px;display:flex;align-items:flex-end;gap:5px}
+.chart-col{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--g),rgba(34,197,94,.3));cursor:pointer;transition:var(--tr)}
+.chart-col:hover{opacity:.75}
+.request-item{
+  display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.request-item:last-child{border-bottom:none}
+.ri-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ri-info{flex:1}
+.ri-name{font-size:13px;font-weight:600}
+.ri-meta{font-size:11px;color:var(--text2)}
+.ri-actions{display:flex;gap:6px}
+.ri-accept{background:rgba(34,197,94,.1);color:var(--g);border:none;font-size:11px;font-weight:700;padding:5px 10px;border-radius:7px;cursor:pointer;transition:var(--tr)}
+.ri-accept:hover{background:rgba(34,197,94,.2)}
+.ri-reject{background:rgba(239,68,68,.08);color:var(--err);border:none;font-size:11px;font-weight:700;padding:5px 10px;border-radius:7px;cursor:pointer;transition:var(--tr)}
+.ri-reject:hover{background:rgba(239,68,68,.15)}
+/* Toggle switch */
+.avail-toggle{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.toggle-track{width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:var(--tr)}
+.toggle-track.on{background:var(--g)}
+.toggle-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.toggle-track.on .toggle-knob{transform:translateX(20px)}
+.avail-label{font-size:14px;font-weight:600}
+
+/* ═══════════════════════════════════
+   ── PAGE: ADMIN ──
+═══════════════════════════════════ */
+.admin-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - var(--nav-h));margin-top:var(--nav-h)}
+.admin-sidebar{
+  background:var(--p);padding:24px 0;
+  border-right:1px solid rgba(255,255,255,.08);
+  position:sticky;top:var(--nav-h);height:calc(100vh - var(--nav-h));overflow-y:auto;
+}
+[data-dark] .admin-sidebar{background:#0a0f1e;border-right-color:#1e293b}
+.admin-logo{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:16px}
+.admin-logo-text{font-size:15px;font-weight:800;color:#fff}
+.admin-logo-text span{color:var(--g)}
+.admin-menu-item{
+  display:flex;align-items:center;gap:10px;padding:11px 20px;
+  font-size:13px;color:rgba(255,255,255,.55);cursor:pointer;transition:var(--tr);
+}
+.admin-menu-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.9)}
+.admin-menu-item.active{background:rgba(34,197,94,.12);color:var(--g)}
+.admin-menu-icon{font-size:16px;flex-shrink:0}
+.admin-content{background:var(--bg);padding:28px}
+.admin-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.admin-page-title{font-size:20px;font-weight:700}
+.admin-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.admin-kpi{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:18px;
+}
+.akpi-label{font-size:12px;color:var(--text2);margin-bottom:8px}
+.akpi-val{font-size:22px;font-weight:800}
+.akpi-change{font-size:11px;margin-top:5px}
+.akpi-up{color:var(--ok)}.akpi-down{color:var(--err)}
+.admin-charts-row{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:20px}
+.admin-chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:20px}
+.ac-title{font-size:14px;font-weight:700;margin-bottom:16px}
+.ac-bars{display:flex;align-items:flex-end;gap:5px;height:110px}
+.ac-bar{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--g),rgba(34,197,94,.3));cursor:pointer;transition:var(--tr)}
+.ac-bar:hover{opacity:.7}
+.admin-table-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.admin-table{width:100%;border-collapse:collapse;font-size:13px}
+.admin-table th{
+  padding:12px 16px;text-align:left;background:var(--bg2);
+  font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;
+}
+.admin-table td{
+  padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);
+}
+.admin-table tr:last-child td{border-bottom:none}
+.admin-table tr:hover td{background:var(--bg2)}
+.user-cell{display:flex;align-items:center;gap:10px}
+.user-ava-sm{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name-sm{font-size:13px;font-weight:600}
+.user-email-sm{font-size:11px;color:var(--text2)}
+
+/* ═══════════════════════════════════
+   ── PAGE: NOT FOUND / ERROR ──
+═══════════════════════════════════ */
+.notfound{text-align:center;padding:80px 20px}
+.nf-code{font-size:80px;font-weight:800;color:var(--border);line-height:1}
+.nf-title{font-size:24px;font-weight:700;margin:16px 0 8px}
+.nf-sub{font-size:15px;color:var(--text2);margin-bottom:32px}
+
+/* ═══════════════════════════════════
+   FOOTER
+═══════════════════════════════════ */
+.footer{background:var(--p);padding:52px 5vw 28px;color:#fff}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:40px;margin-bottom:40px}
+.footer-brand-sub{font-size:14px;color:rgba(255,255,255,.45);line-height:1.7;margin-top:12px;max-width:220px}
+.footer-col-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.8);margin-bottom:16px}
+.footer-links{display:flex;flex-direction:column;gap:10px}
+.footer-link{font-size:13px;color:rgba(255,255,255,.45);cursor:pointer;transition:var(--tr)}
+.footer-link:hover{color:var(--g)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.35)}
+.social-row{display:flex;gap:10px}
+.social-btn-sm{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;transition:var(--tr);
+}
+.social-btn-sm:hover{background:var(--g);transform:translateY(-2px)}
+
+/* ═══════════════════════════════════
+   MOBILE MENU
+═══════════════════════════════════ */
+.mobile-menu{
+  position:fixed;top:var(--nav-h);left:0;right:0;z-index:400;
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:16px 20px;display:none;flex-direction:column;gap:4px;
+  box-shadow:var(--sh2);
+}
+.mobile-menu.open{display:flex;animation:slideDown .25s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.mobile-link{
+  padding:12px 14px;border-radius:10px;font-size:15px;font-weight:500;
+  color:var(--text);cursor:pointer;transition:var(--tr);
+}
+.mobile-link:hover{background:var(--bg2)}
+.mobile-link.active{color:var(--g);background:rgba(34,197,94,.08)}
+
+/* ═══════════════════════════════════
+   MISC UTILS
+═══════════════════════════════════ */
+.text-green{color:var(--g)}.text-blue{color:var(--b)}.text-muted{color:var(--muted)}.text-err{color:var(--err)}
+.fw-700{font-weight:700}.fw-800{font-weight:800}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}.mt-32{margin-top:32px}
+.mb-8{margin-bottom:8px}.mb-16{margin-bottom:16px}.mb-24{margin-bottom:24px}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
+.separator{height:1px;background:var(--border);margin:16px 0}
+
+/* ═══════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════ */
+@media(max-width:1024px){
+  .hero-inner,.contact-grid,.booking-layout{grid-template-columns:1fr}
+  .profile-grid{grid-template-columns:1fr}
+  .dashboard-grid{grid-template-columns:repeat(2,1fr)}
+  .dashboard-bottom,.admin-charts-row{grid-template-columns:1fr}
+  .admin-kpis{grid-template-columns:repeat(2,1fr)}
+  .footer-top{grid-template-columns:1fr 1fr;gap:24px}
+  .admin-layout{grid-template-columns:1fr}
+  .admin-sidebar{display:none}
+  .cta-banner{flex-direction:column}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .hero-title{font-size:2.4rem}
+  .dashboard-grid{grid-template-columns:1fr 1fr}
+  .admin-kpis{grid-template-columns:repeat(2,1fr)}
+  .footer-top{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .auth-card{padding:28px 20px}
+  .dashboard-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     LOADING OVERLAY
+════════════════════════════════════ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="loading-spinner-lg"></div>
+    <div class="loading-text" id="loadingText">Chargement...</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TOAST CONTAINER
+════════════════════════════════════ -->
+<div id="toast-container"></div>
+
+<!-- ════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════ -->
+<nav class="nav" id="mainNav">
+  <div class="nav-logo" onclick="navigate('home')">
+    <div class="logo-icon">🔧</div>
+    <div class="logo-name">DARKI<span> SERVICES</span></div>
+  </div>
+
+  <div class="nav-links" id="navLinks">
+    <div class="nav-link active" data-page="home" onclick="navigate('home')">Accueil</div>
+    <div class="nav-link" data-page="services" onclick="navigate('services')">Services</div>
+    <div class="nav-link" data-page="providers" onclick="navigate('providers')">Prestataires</div>
+    <div class="nav-link" data-page="contact" onclick="navigate('contact')">Contact</div>
+  </div>
+
+  <div class="nav-actions">
+    <!-- Shown when logged in -->
+    <div class="nav-user" id="navUser">
+      <div class="nav-username" id="navUsername">Mohammed</div>
+      <div class="nav-avatar" id="navAvatarBtn" title="Mon profil">M</div>
+    </div>
+    <!-- Shown when logged out -->
+    <div id="navGuest" style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="navigate('login')">Se connecter</button>
+      <button class="btn btn-primary btn-sm" onclick="navigate('register')">S'inscrire</button>
+    </div>
+    <button class="theme-btn" id="themeBtn" title="Mode sombre">🌙</button>
+    <div class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-link active" onclick="navigate('home');closeMobileMenu()">🏠 Accueil</div>
+  <div class="mobile-link" onclick="navigate('services');closeMobileMenu()">🔧 Services</div>
+  <div class="mobile-link" onclick="navigate('providers');closeMobileMenu()">⭐ Prestataires</div>
+  <div class="mobile-link" onclick="navigate('contact');closeMobileMenu()">📞 Contact</div>
+  <div class="separator"></div>
+  <div id="mobileGuest">
+    <div class="mobile-link" onclick="navigate('login');closeMobileMenu()">🔐 Se connecter</div>
+    <div class="mobile-link" onclick="navigate('register');closeMobileMenu()">✨ S'inscrire</div>
+  </div>
+  <div id="mobileLoggedIn" style="display:none">
+    <div class="mobile-link" onclick="navigate('profile');closeMobileMenu()">👤 Mon profil</div>
+    <div class="mobile-link" onclick="logout();closeMobileMenu()">🚪 Déconnexion</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: HOME
+════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-dots"></div>
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge"><div class="badge-pulse"></div>Disponible au Maroc — 2025</div>
+        <h1 class="hero-title">Vos services locaux,<br><span class="hero-hl">à portée de main.</span></h1>
+        <p class="hero-sub">Connectez-vous aux meilleurs électriciens, plombiers et techniciens. Rapide. Fiable. Professionnel.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary btn-lg" onclick="navigate('services')">🔍 Trouver un service</button>
+          <button class="btn btn-ghost btn-lg" onclick="navigate('register')">Devenir prestataire →</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="h-stat-num text-green">12K+</div><div class="h-stat-label">Prestataires</div></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><div class="h-stat-num">50K+</div><div class="h-stat-label">Services réalisés</div></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><div class="h-stat-num">4.8⭐</div><div class="h-stat-label">Note moyenne</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-glow"></div>
+        <div class="hero-float f1">
+          <div class="fl-icon" style="background:rgba(34,197,94,.12)">✅</div>
+          <div><div class="fl-t">Demande acceptée!</div><div class="fl-s">Électricien · 2 min</div></div>
+        </div>
+        <div class="hero-float f2">
+          <div class="fl-icon" style="background:rgba(56,189,248,.12)">⭐</div>
+          <div><div class="fl-t">Avis 5/5 reçu</div><div class="fl-s">Karim B. · Casablanca</div></div>
+        </div>
+        <div class="hero-phone">
+          <div class="phone-notch"><div class="phone-pill"></div></div>
+          <div class="phone-screen">
+            <div class="app-topbar">
+              <div class="app-greet">Bonjour Mohammed 👋</div>
+              <div class="app-ava">M</div>
+            </div>
+            <div class="app-search-mini">🔍 Chercher un service...</div>
+            <div class="mini-cats">
+              <div class="mini-cat"><div class="mc-icon" style="background:rgba(56,189,248,.12)">⚡</div><div class="mc-label">Électricité</div></div>
+              <div class="mini-cat"><div class="mc-icon" style="background:rgba(34,197,94,.12)">🔧</div><div class="mc-label">Plomberie</div></div>
+              <div class="mini-cat"><div class="mc-icon" style="background:rgba(251,191,36,.12)">🧹</div><div class="mc-label">Nettoyage</div></div>
+              <div class="mini-cat"><div class="mc-icon" style="background:rgba(168,85,247,.12)">📦</div><div class="mc-label">Livraison</div></div>
+            </div>
+            <div class="mini-prov">
+              <div class="mp-ava" style="background:rgba(56,189,248,.12)">⚡</div>
+              <div class="mp-info">
+                <div class="mp-name">Karim Benali</div>
+                <div class="mp-job">Électricien · 150 MAD/h</div>
+                <div class="mp-rating">⭐ 4.9 · Disponible</div>
+              </div>
+            </div>
+            <div class="mini-prov">
+              <div class="mp-ava" style="background:rgba(34,197,94,.12)">🔧</div>
+              <div class="mp-info">
+                <div class="mp-name">Hassan Moussaoui</div>
+                <div class="mp-job">Plombier · 120 MAD/h</div>
+                <div class="mp-rating">⭐ 4.8 · Disponible</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="section-pad" style="background:var(--bg2)">
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="sec-tag">📂 Nos services</div>
+      <h2 class="sec-title">Tous les services dont<br>vous avez besoin</h2>
+      <p class="sec-sub">Trouvez le professionnel idéal pour chaque besoin.</p>
+      <div class="cats-grid">
+        <div class="cat-card" onclick="filterServices('electricite')"><div class="cat-card-icon" style="background:rgba(56,189,248,.1)">⚡</div><div class="cat-card-name">Électricité</div><div class="cat-card-count">340 prestataires</div><div class="cat-card-arrow">→</div></div>
+        <div class="cat-card" onclick="filterServices('plomberie')"><div class="cat-card-icon" style="background:rgba(34,197,94,.1)">🔧</div><div class="cat-card-name">Plomberie</div><div class="cat-card-count">280 prestataires</div><div class="cat-card-arrow">→</div></div>
+        <div class="cat-card" onclick="filterServices('nettoyage')"><div class="cat-card-icon" style="background:rgba(251,191,36,.1)">🧹</div><div class="cat-card-name">Nettoyage</div><div class="cat-card-count">520 prestataires</div><div class="cat-card-arrow">→</div></div>
+        <div class="cat-card" onclick="filterServices('peinture')"><div class="cat-card-icon" style="background:rgba(248,113,113,.1)">🎨</div><div class="cat-card-name">Peinture</div><div class="cat-card-count">190 prestataires</div><div class="cat-card-arrow">→</div></div>
+        <div class="cat-card" onclick="filterServices('livraison')"><div class="cat-card-icon" style="background:rgba(168,85,247,.1)">📦</div><div class="cat-card-name">Livraison</div><div class="cat-card-count">410 prestataires</div><div class="cat-card-arrow">→</div></div>
+        <div class="cat-card" onclick="filterServices('jardinage')"><div class="cat-card-icon" style="background:rgba(34,197,94,.1)">🌿</div><div class="cat-card-name">Jardinage</div><div class="cat-card-count">150 prestataires</div><div class="cat-card-arrow">→</div></div>
+        <div class="cat-card" onclick="filterServices('climatisation')"><div class="cat-card-icon" style="background:rgba(56,189,248,.1)">❄️</div><div class="cat-card-name">Climatisation</div><div class="cat-card-count">220 prestataires</div><div class="cat-card-arrow">→</div></div>
+        <div class="cat-card" onclick="filterServices('reparation')"><div class="cat-card-icon" style="background:rgba(245,158,11,.1)">🛠️</div><div class="cat-card-name">Réparation</div><div class="cat-card-count">380 prestataires</div><div class="cat-card-arrow">→</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section-pad how-dark">
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="sec-tag" style="color:var(--g)">⚡ Simple & Rapide</div>
+      <h2 class="sec-title" style="color:#fff">Comment ça fonctionne</h2>
+      <div class="how-grid">
+        <div class="how-card"><div class="how-step">🔍</div><div class="how-num">1</div><div class="how-title">Décrivez votre besoin</div><div class="how-desc">Sélectionnez la catégorie, ajoutez une description. GPS activé automatiquement.</div></div>
+        <div class="how-card"><div class="how-step">🤝</div><div class="how-num">2</div><div class="how-title">Choisissez un prestataire</div><div class="how-desc">Consultez les profils, avis et tarifs. Notre IA recommande les meilleurs.</div></div>
+        <div class="how-card"><div class="how-step">✅</div><div class="how-num">3</div><div class="how-title">Service réalisé</div><div class="how-desc">Paiement cash ou en ligne. Laissez un avis pour aider la communauté.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOP PROVIDERS -->
+  <section class="section-pad">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:44px">
+        <div>
+          <div class="sec-tag">⭐ Top Prestataires</div>
+          <h2 class="sec-title" style="margin-bottom:0">Les meilleurs pros au Maroc</h2>
+        </div>
+        <button class="btn btn-ghost" onclick="navigate('providers')">Voir tous →</button>
+      </div>
+      <div class="provs-grid">
+        <div class="prov-card" onclick="navigate('booking')">
+          <div class="prov-top" style="background:linear-gradient(135deg,rgba(56,189,248,.08),rgba(56,189,248,.15))">⚡<div class="prov-verified">Vérifié</div></div>
+          <div class="prov-body"><div class="prov-name">Karim Benali</div><div class="prov-job">Électricien certifié · 8 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">150 MAD/h</div></div></div>
+          <div class="prov-foot"><div class="prov-city">📍 Casablanca</div><div class="prov-book-btn" onclick="event.stopPropagation();navigate('booking')">Réserver</div></div>
+        </div>
+        <div class="prov-card" onclick="navigate('booking')">
+          <div class="prov-top" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.15))">🔧<div class="prov-verified">Top Rated</div></div>
+          <div class="prov-body"><div class="prov-name">Hassan Moussaoui</div><div class="prov-job">Plombier expert · 12 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">120 MAD/h</div></div></div>
+          <div class="prov-foot"><div class="prov-city">📍 Rabat</div><div class="prov-book-btn" onclick="event.stopPropagation();navigate('booking')">Réserver</div></div>
+        </div>
+        <div class="prov-card" onclick="navigate('booking')">
+          <div class="prov-top" style="background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(251,191,36,.15))">🧹</div>
+          <div class="prov-body"><div class="prov-name">Fatima Zahraoui</div><div class="prov-job">Spécialiste nettoyage · 5 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">80 MAD/h</div></div></div>
+          <div class="prov-foot"><div class="prov-city">📍 Marrakech</div><div class="prov-book-btn" onclick="event.stopPropagation();navigate('booking')">Réserver</div></div>
+        </div>
+        <div class="prov-card" onclick="navigate('booking')">
+          <div class="prov-top" style="background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(168,85,247,.15))">❄️<div class="prov-verified">Vérifié</div></div>
+          <div class="prov-body"><div class="prov-name">Youssef Alami</div><div class="prov-job">Technicien clim · 10 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">200 MAD/h</div></div></div>
+          <div class="prov-foot"><div class="prov-city">📍 Fès</div><div class="prov-book-btn" onclick="event.stopPropagation();navigate('booking')">Réserver</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="section-pad" style="background:var(--bg2)">
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="cta-banner">
+        <div class="cta-banner-text">
+          <div class="cta-banner-title">Devenez prestataire DARKI SERVICES</div>
+          <div class="cta-banner-sub">Rejoignez +12 000 pros et boostez votre activité dès aujourd'hui.</div>
+        </div>
+        <div class="cta-banner-btns">
+          <button class="btn btn-primary btn-lg" onclick="navigate('register')">Commencer gratuitement</button>
+          <button class="btn" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2)" onclick="navigate('contact')">En savoir plus</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div>
+          <div class="nav-logo"><div class="logo-icon">🔧</div><div class="logo-name">DARKI<span> SERVICES</span></div></div>
+          <div class="footer-brand-sub">La marketplace de services locaux #1 au Maroc. Connectez, réservez, faites confiance.</div>
+          <div class="social-row" style="margin-top:18px">
+            <div class="social-btn-sm">📘</div>
+            <div class="social-btn-sm">📷</div>
+            <div class="social-btn-sm">🐦</div>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">PRODUIT</div>
+          <div class="footer-links">
+            <div class="footer-link" onclick="navigate('services')">Services</div>
+            <div class="footer-link" onclick="navigate('providers')">Prestataires</div>
+            <div class="footer-link" onclick="navigate('booking')">Réserver</div>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">COMPTE</div>
+          <div class="footer-links">
+            <div class="footer-link" onclick="navigate('login')">Se connecter</div>
+            <div class="footer-link" onclick="navigate('register')">S'inscrire</div>
+            <div class="footer-link" onclick="navigate('profile')">Mon profil</div>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">CONTACT</div>
+          <div class="footer-links">
+            <div class="footer-link" onclick="navigate('contact')">Nous contacter</div>
+            <div class="footer-link">contact@darkidigital.ma</div>
+            <div class="footer-link">+212 6XX XXX XXX</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-copy">© 2025 DARKIDIGITAL. Tous droits réservés.</div>
+        <div style="display:flex;gap:20px">
+          <span class="footer-link">Confidentialité</span>
+          <span class="footer-link">CGU</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: SERVICES
+════════════════════════════════════ -->
+<div id="page-services" class="page">
+  <div class="page-wrap">
+    <div class="services-header">
+      <div class="sec-tag">🔧 Explorer</div>
+      <h1 class="sec-title">Tous nos services</h1>
+      <p class="sec-sub">Filtrez et trouvez le prestataire parfait pour votre besoin.</p>
+    </div>
+    <div class="services-search">
+      <input class="service-search-input" type="text" placeholder="🔍 Rechercher un service..." id="serviceSearchInput" oninput="filterServiceCards()"/>
+      <select class="form-select" style="width:auto;min-width:160px" onchange="filterServiceCards()">
+        <option value="">Toutes les villes</option>
+        <option>Casablanca</option>
+        <option>Rabat</option>
+        <option>Marrakech</option>
+        <option>Fès</option>
+        <option>Tanger</option>
+      </select>
+      <button class="btn btn-primary" onclick="showToast('🔍 Recherche en cours...','info')">Rechercher</button>
+    </div>
+    <div class="services-filters" id="servicesFilters">
+      <div class="filter-chip active" onclick="setFilter(this,'tous')">Tous</div>
+      <div class="filter-chip" onclick="setFilter(this,'electricite')">⚡ Électricité</div>
+      <div class="filter-chip" onclick="setFilter(this,'plomberie')">🔧 Plomberie</div>
+      <div class="filter-chip" onclick="setFilter(this,'nettoyage')">🧹 Nettoyage</div>
+      <div class="filter-chip" onclick="setFilter(this,'peinture')">🎨 Peinture</div>
+      <div class="filter-chip" onclick="setFilter(this,'livraison')">📦 Livraison</div>
+      <div class="filter-chip" onclick="setFilter(this,'jardinage')">🌿 Jardinage</div>
+      <div class="filter-chip" onclick="setFilter(this,'climatisation')">❄️ Climatisation</div>
+    </div>
+    <div class="services-grid" id="servicesGrid">
+      <div class="service-card" data-cat="electricite" onclick="navigate('booking')">
+        <div class="service-img" style="background:linear-gradient(135deg,rgba(56,189,248,.08),rgba(56,189,248,.15))">⚡</div>
+        <div class="service-body">
+          <div class="service-name">Installation électrique</div>
+          <div class="service-desc">Installation, réparation et mise aux normes de vos équipements électriques.</div>
+          <div class="service-meta"><div class="service-price-range">100–300 MAD</div><div class="service-providers-count">340 prestataires</div></div>
+        </div>
+      </div>
+      <div class="service-card" data-cat="plomberie" onclick="navigate('booking')">
+        <div class="service-img" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.15))">🔧</div>
+        <div class="service-body">
+          <div class="service-name">Plomberie & sanitaire</div>
+          <div class="service-desc">Réparation de fuites, installation sanitaire, débouchage de canalisations.</div>
+          <div class="service-meta"><div class="service-price-range">80–250 MAD</div><div class="service-providers-count">280 prestataires</div></div>
+        </div>
+      </div>
+      <div class="service-card" data-cat="nettoyage" onclick="navigate('booking')">
+        <div class="service-img" style="background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(251,191,36,.15))">🧹</div>
+        <div class="service-body">
+          <div class="service-name">Nettoyage maison</div>
+          <div class="service-desc">Nettoyage complet, entretien régulier, nettoyage de fin de chantier.</div>
+          <div class="service-meta"><div class="service-price-range">60–200 MAD</div><div class="service-providers-count">520 prestataires</div></div>
+        </div>
+      </div>
+      <div class="service-card" data-cat="peinture" onclick="navigate('booking')">
+        <div class="service-img" style="background:linear-gradient(135deg,rgba(248,113,113,.08),rgba(248,113,113,.15))">🎨</div>
+        <div class="service-body">
+          <div class="service-name">Peinture intérieure</div>
+          <div class="service-desc">Peinture murs et plafonds, enduit, rénovation complète de vos espaces.</div>
+          <div class="service-meta"><div class="service-price-range">150–500 MAD</div><div class="service-providers-count">190 prestataires</div></div>
+        </div>
+      </div>
+      <div class="service-card" data-cat="livraison" onclick="navigate('booking')">
+        <div class="service-img" style="background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(168,85,247,.15))">📦</div>
+        <div class="service-body">
+          <div class="service-name">Livraison & déménagement</div>
+          <div class="service-desc">Livraison express, déménagement, transport de mobilier et marchandises.</div>
+          <div class="service-meta"><div class="service-price-range">50–400 MAD</div><div class="service-providers-count">410 prestataires</div></div>
+        </div>
+      </div>
+      <div class="service-card" data-cat="jardinage" onclick="navigate('booking')">
+        <div class="service-img" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.15))">🌿</div>
+        <div class="service-body">
+          <div class="service-name">Jardinage & espaces verts</div>
+          <div class="service-desc">Taille, entretien, arrosage automatique et aménagement paysager.</div>
+          <div class="service-meta"><div class="service-price-range">80–300 MAD</div><div class="service-providers-count">150 prestataires</div></div>
+        </div>
+      </div>
+      <div class="service-card" data-cat="climatisation" onclick="navigate('booking')">
+        <div class="service-img" style="background:linear-gradient(135deg,rgba(56,189,248,.08),rgba(56,189,248,.15))">❄️</div>
+        <div class="service-body">
+          <div class="service-name">Climatisation & chauffage</div>
+          <div class="service-desc">Installation, entretien et réparation de climatiseurs et systèmes de chauffage.</div>
+          <div class="service-meta"><div class="service-price-range">150–600 MAD</div><div class="service-providers-count">220 prestataires</div></div>
+        </div>
+      </div>
+      <div class="service-card" data-cat="reparation" onclick="navigate('booking')">
+        <div class="service-img" style="background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.15))">🛠️</div>
+        <div class="service-body">
+          <div class="service-name">Réparation appareils</div>
+          <div class="service-desc">Réparation électroménager, appareils électroniques, machines à laver.</div>
+          <div class="service-meta"><div class="service-price-range">100–400 MAD</div><div class="service-providers-count">380 prestataires</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: PROVIDERS
+════════════════════════════════════ -->
+<div id="page-providers" class="page">
+  <div class="page-wrap">
+    <div class="sec-tag">⭐ Prestataires</div>
+    <h1 class="sec-title">Nos professionnels vérifiés</h1>
+    <p class="sec-sub" style="margin-bottom:36px">Tous certifiés, évalués par la communauté.</p>
+    <div class="services-search">
+      <input class="service-search-input" type="text" placeholder="🔍 Rechercher un prestataire..."/>
+      <select class="form-select" style="width:auto;min-width:160px">
+        <option>Toutes catégories</option>
+        <option>Électricité</option>
+        <option>Plomberie</option>
+        <option>Nettoyage</option>
+      </select>
+    </div>
+    <div class="provs-grid">
+      <div class="prov-card" onclick="navigate('booking')"><div class="prov-top" style="background:linear-gradient(135deg,rgba(56,189,248,.08),rgba(56,189,248,.15))">⚡<div class="prov-verified">Vérifié</div></div><div class="prov-body"><div class="prov-name">Karim Benali</div><div class="prov-job">Électricien certifié · 8 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">150 MAD/h</div></div></div><div class="prov-foot"><div class="prov-city">📍 Casablanca</div><div class="prov-book-btn">Réserver</div></div></div>
+      <div class="prov-card" onclick="navigate('booking')"><div class="prov-top" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.15))">🔧<div class="prov-verified">Top Rated</div></div><div class="prov-body"><div class="prov-name">Hassan Moussaoui</div><div class="prov-job">Plombier expert · 12 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">120 MAD/h</div></div></div><div class="prov-foot"><div class="prov-city">📍 Rabat</div><div class="prov-book-btn">Réserver</div></div></div>
+      <div class="prov-card" onclick="navigate('booking')"><div class="prov-top" style="background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(251,191,36,.15))">🧹</div><div class="prov-body"><div class="prov-name">Fatima Zahraoui</div><div class="prov-job">Nettoyage · 5 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">80 MAD/h</div></div></div><div class="prov-foot"><div class="prov-city">📍 Marrakech</div><div class="prov-book-btn">Réserver</div></div></div>
+      <div class="prov-card" onclick="navigate('booking')"><div class="prov-top" style="background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(168,85,247,.15))">❄️<div class="prov-verified">Vérifié</div></div><div class="prov-body"><div class="prov-name">Youssef Alami</div><div class="prov-job">Technicien clim · 10 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">200 MAD/h</div></div></div><div class="prov-foot"><div class="prov-city">📍 Fès</div><div class="prov-book-btn">Réserver</div></div></div>
+      <div class="prov-card" onclick="navigate('booking')"><div class="prov-top" style="background:linear-gradient(135deg,rgba(248,113,113,.08),rgba(248,113,113,.15))">🎨</div><div class="prov-body"><div class="prov-name">Omar Idrissi</div><div class="prov-job">Peintre · 7 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐</div><div class="prov-price">130 MAD/h</div></div></div><div class="prov-foot"><div class="prov-city">📍 Casablanca</div><div class="prov-book-btn">Réserver</div></div></div>
+      <div class="prov-card" onclick="navigate('booking')"><div class="prov-top" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.15))">🌿</div><div class="prov-body"><div class="prov-name">Aicha Benkirane</div><div class="prov-job">Jardinière · 3 ans</div><div class="prov-meta"><div class="prov-stars">⭐⭐⭐⭐⭐</div><div class="prov-price">90 MAD/h</div></div></div><div class="prov-foot"><div class="prov-city">📍 Rabat</div><div class="prov-book-btn">Réserver</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: LOGIN
+════════════════════════════════════ -->
+<div id="page-login" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-icon">🔧</div>
+        <div class="logo-name">DARKI<span> SERVICES</span></div>
+      </div>
+      <div class="auth-title">Bon retour ! 👋</div>
+      <div class="auth-sub">Connectez-vous à votre compte DARKI SERVICES</div>
+
+      <div id="loginAlert" style="display:none"></div>
+
+      <button class="social-btn" onclick="loginWithGoogle()">
+        <span>🌐</span> Continuer avec Google
+      </button>
+      <button class="social-btn" onclick="loginWithPhone()">
+        <span>📱</span> Continuer avec un numéro de téléphone
+      </button>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">ou</div><div class="divider-line"></div></div>
+
+      <form id="loginForm" onsubmit="submitLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email<span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">✉️</span>
+            <input class="form-input" id="loginEmail" type="email" placeholder="votre@email.com" autocomplete="email"/>
+          </div>
+          <div class="form-error" id="loginEmailErr">⚠️ Email invalide</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mot de passe<span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password"/>
+            <span class="input-toggle" onclick="togglePwd('loginPassword',this)">👁️</span>
+          </div>
+          <div class="form-error" id="loginPasswordErr">⚠️ Mot de passe requis</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+          <span style="font-size:13px;color:var(--g);cursor:pointer;font-weight:600" onclick="showToast('📧 Email de réinitialisation envoyé !','success')">Mot de passe oublié ?</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="loginSubmitBtn">
+          Se connecter
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Pas encore de compte ? <a onclick="navigate('register')">S'inscrire gratuitement</a>
+      </div>
+      <div class="auth-footer" style="margin-top:8px">
+        <a onclick="navigate('dashboard')">🔧 Espace prestataire</a>
+        &nbsp;·&nbsp;
+        <a onclick="navigate('admin')">🖥️ Admin</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: REGISTER
+════════════════════════════════════ -->
+<div id="page-register" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-icon">🔧</div>
+        <div class="logo-name">DARKI<span> SERVICES</span></div>
+      </div>
+      <div class="auth-title">Créer un compte ✨</div>
+      <div class="auth-sub">Rejoignez 50 000+ utilisateurs DARKI SERVICES</div>
+
+      <button class="social-btn" onclick="loginWithGoogle()">
+        <span>🌐</span> S'inscrire avec Google
+      </button>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">ou</div><div class="divider-line"></div></div>
+
+      <form id="registerForm" onsubmit="submitRegister(event)">
+        <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Prénom<span class="req">*</span></label>
+            <input class="form-input" id="regFirstName" type="text" placeholder="Mohammed"/>
+            <div class="form-error" id="regFirstNameErr">⚠️ Requis</div>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Nom<span class="req">*</span></label>
+            <input class="form-input" id="regLastName" type="text" placeholder="Alaoui"/>
+          </div>
+        </div>
+        <div class="form-group mt-12">
+          <label class="form-label">Email<span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">✉️</span>
+            <input class="form-input" id="regEmail" type="email" placeholder="votre@email.com"/>
+          </div>
+          <div class="form-error" id="regEmailErr">⚠️ Email invalide</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Téléphone<span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">📱</span>
+            <input class="form-input" id="regPhone" type="tel" placeholder="+212 6XX XXX XXX"/>
+          </div>
+          <div class="form-error" id="regPhoneErr">⚠️ Numéro invalide</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Compte<span class="req">*</span></label>
+          <select class="form-select" id="regRole">
+            <option value="customer">👤 Client — Je cherche des services</option>
+            <option value="provider">🔧 Prestataire — Je propose des services</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mot de passe<span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" id="regPassword" type="password" placeholder="Minimum 8 caractères" oninput="checkStrength(this.value)"/>
+            <span class="input-toggle" onclick="togglePwd('regPassword',this)">👁️</span>
+          </div>
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="form-hint" id="strengthLabel">Entrez votre mot de passe</div>
+          <div class="form-error" id="regPasswordErr">⚠️ Minimum 8 caractères requis</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmer le mot de passe<span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" id="regConfirm" type="password" placeholder="Répéter le mot de passe"/>
+          </div>
+          <div class="form-error" id="regConfirmErr">⚠️ Les mots de passe ne correspondent pas</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:20px">
+          <input type="checkbox" id="regTerms" style="margin-top:3px;accent-color:var(--g);width:16px;height:16px;flex-shrink:0;cursor:pointer"/>
+          <label for="regTerms" style="font-size:13px;color:var(--text2);cursor:pointer">
+            J'accepte les <span style="color:var(--g);font-weight:600">Conditions d'utilisation</span> et la <span style="color:var(--g);font-weight:600">Politique de confidentialité</span>
+          </label>
+        </div>
+        <div class="form-error" id="regTermsErr" style="margin-top:-10px;margin-bottom:12px">⚠️ Vous devez accepter les conditions</div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="regSubmitBtn">
+          Créer mon compte
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Déjà un compte ? <a onclick="navigate('login')">Se connecter</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: PROFILE
+════════════════════════════════════ -->
+<div id="page-profile" class="page">
+  <div class="page-wrap">
+    <div class="profile-grid">
+      <!-- SIDEBAR -->
+      <div class="profile-sidebar">
+        <div class="profile-cover"></div>
+        <div class="profile-info">
+          <div class="profile-ava" id="profileAvaLetter">M</div>
+          <div class="profile-name-big" id="profileNameDisplay">Mohammed Alaoui</div>
+          <div class="profile-email" id="profileEmailDisplay">mohammed@example.com</div>
+          <div class="profile-stats-row">
+            <div class="ps-item"><div class="ps-num">24</div><div class="ps-label">Demandes</div></div>
+            <div class="ps-item"><div class="ps-num">4.9⭐</div><div class="ps-label">Note</div></div>
+            <div class="ps-item"><div class="ps-num">3</div><div class="ps-label">Favoris</div></div>
+          </div>
+          <button class="btn btn-outline btn-block btn-sm" onclick="navigate('booking')">+ Nouvelle demande</button>
+        </div>
+        <div class="profile-menu">
+          <div class="pmenu-item active-menu" onclick="showProfileTab('info')"><div class="pmenu-left"><span class="pmenu-icon">👤</span>Mon profil</div><span class="pmenu-chevron">›</span></div>
+          <div class="pmenu-item" onclick="showProfileTab('orders')"><div class="pmenu-left"><span class="pmenu-icon">📋</span>Mes demandes</div><span class="pmenu-chevron">›</span></div>
+          <div class="pmenu-item" onclick="showProfileTab('payments')"><div class="pmenu-left"><span class="pmenu-icon">💳</span>Paiements</div><span class="pmenu-chevron">›</span></div>
+          <div class="pmenu-item" onclick="showProfileTab('settings')"><div class="pmenu-left"><span class="pmenu-icon">⚙️</span>Paramètres</div><span class="pmenu-chevron">›</span></div>
+          <div class="pmenu-item" onclick="logout()" style="color:var(--err)"><div class="pmenu-left"><span class="pmenu-icon">🚪</span>Déconnexion</div></div>
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="profile-content">
+        <!-- Tab: Info -->
+        <div id="profileTabInfo" class="profile-section">
+          <div class="ps-title"><span>👤</span> Informations personnelles</div>
+          <div class="info-row"><div class="info-label">Prénom & Nom</div><div style="display:flex;align-items:center;gap:12px"><div class="info-value" id="pInfoName">Mohammed Alaoui</div><span class="info-edit" onclick="openEditProfile()">Modifier</span></div></div>
+          <div class="info-row"><div class="info-label">Email</div><div class="info-value" id="pInfoEmail">mohammed@example.com</div></div>
+          <div class="info-row"><div class="info-label">Téléphone</div><div class="info-value">+212 612 345 678</div></div>
+          <div class="info-row"><div class="info-label">Ville</div><div class="info-value">Casablanca</div></div>
+          <div class="info-row"><div class="info-label">Membre depuis</div><div class="info-value">Janvier 2025</div></div>
+        </div>
+        <!-- Tab: Orders -->
+        <div id="profileTabOrders" class="profile-section" style="display:none">
+          <div class="ps-title"><span>📋</span> Mes dernières demandes</div>
+          <div class="order-item"><div class="order-icon" style="background:rgba(56,189,248,.1)">⚡</div><div class="order-info"><div class="order-name">Réparation prise électrique</div><div class="order-meta">Karim Benali · 15 Jan 2025</div></div><div><div class="order-amount">150 MAD</div><div class="badge badge-green" style="margin-top:4px">Terminé</div></div></div>
+          <div class="order-item"><div class="order-icon" style="background:rgba(34,197,94,.1)">🔧</div><div class="order-info"><div class="order-name">Fuite d'eau salle de bain</div><div class="order-meta">Hassan M. · 10 Jan 2025</div></div><div><div class="order-amount">200 MAD</div><div class="badge badge-orange" style="margin-top:4px">En cours</div></div></div>
+          <div class="order-item"><div class="order-icon" style="background:rgba(251,191,36,.1)">🧹</div><div class="order-info"><div class="order-name">Nettoyage appartement</div><div class="order-meta">Fatima Z. · 5 Jan 2025</div></div><div><div class="order-amount">350 MAD</div><div class="badge badge-green" style="margin-top:4px">Terminé</div></div></div>
+          <div style="text-align:center;margin-top:16px"><button class="btn btn-outline btn-sm" onclick="navigate('booking')">+ Nouvelle demande</button></div>
+        </div>
+        <!-- Tab: Payments -->
+        <div id="profileTabPayments" class="profile-section" style="display:none">
+          <div class="ps-title"><span>💳</span> Méthodes de paiement</div>
+          <div class="alert alert-info">💡 Ajoutez une carte pour les paiements en ligne sécurisés via Stripe.</div>
+          <button class="btn btn-outline btn-sm" onclick="showToast('💳 Fonctionnalité Stripe — bientôt disponible !','info')">+ Ajouter une carte</button>
+          <div class="separator"></div>
+          <div class="ps-title"><span>📊</span> Historique des paiements</div>
+          <div class="order-item"><div class="order-icon" style="background:rgba(34,197,94,.1)">💸</div><div class="order-info"><div class="order-name">Paiement — Électricité</div><div class="order-meta">15 Jan 2025 · Cash</div></div><div class="order-amount">150 MAD</div></div>
+          <div class="order-item"><div class="order-icon" style="background:rgba(34,197,94,.1)">💸</div><div class="order-info"><div class="order-name">Paiement — Nettoyage</div><div class="order-meta">5 Jan 2025 · Cash</div></div><div class="order-amount">350 MAD</div></div>
+        </div>
+        <!-- Tab: Settings -->
+        <div id="profileTabSettings" class="profile-section" style="display:none">
+          <div class="ps-title"><span>⚙️</span> Paramètres du compte</div>
+          <div class="info-row"><div class="info-label">Thème</div><div style="display:flex;align-items:center;gap:10px"><div class="info-value" id="themeLabel">Mode clair</div><button class="btn btn-ghost btn-sm" onclick="toggleTheme()">Changer</button></div></div>
+          <div class="info-row"><div class="info-label">Langue</div><div style="display:flex;align-items:center;gap:10px"><div class="info-value">Français</div><button class="btn btn-ghost btn-sm" onclick="showToast('🌐 Multi-langue bientôt !','info')">Changer</button></div></div>
+          <div class="info-row"><div class="info-label">Notifications</div><div style="display:flex;align-items:center;gap:10px"><div class="info-value">Activées</div><button class="btn btn-ghost btn-sm">Gérer</button></div></div>
+          <div class="separator"></div>
+          <button class="btn btn-danger btn-sm" onclick="showDeleteModal()">🗑️ Supprimer mon compte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: BOOKING
+════════════════════════════════════ -->
+<div id="page-booking" class="page">
+  <div class="page-wrap">
+    <div class="sec-tag">📋 Réservation</div>
+    <h1 class="sec-title" style="margin-bottom:8px">Nouvelle demande de service</h1>
+    <p class="sec-sub" style="margin-bottom:36px">Décrivez votre besoin, choisissez votre prestataire et réservez en quelques clics.</p>
+
+    <div class="booking-steps" id="bookingSteps">
+      <div class="bstep active" id="bstep1"><div class="bstep-num">1</div><div class="bstep-label">Service</div></div>
+      <div class="bstep" id="bstep2"><div class="bstep-num">2</div><div class="bstep-label">Détails</div></div>
+      <div class="bstep" id="bstep3"><div class="bstep-num">3</div><div class="bstep-label">Localisation</div></div>
+      <div class="bstep" id="bstep4"><div class="bstep-num">4</div><div class="bstep-label">Paiement</div></div>
+    </div>
+
+    <div class="booking-layout">
+      <div>
+        <!-- Step 1 -->
+        <div id="bookingStep1">
+          <div class="booking-form">
+            <div class="booking-form-title">1. Choisissez votre service</div>
+            <div class="form-group">
+              <label class="form-label">Catégorie<span class="req">*</span></label>
+              <select class="form-select" id="bookingCat" onchange="updateBookingSummary()">
+                <option value="">Sélectionner une catégorie</option>
+                <option value="electricite">⚡ Électricité — 100–300 MAD</option>
+                <option value="plomberie">🔧 Plomberie — 80–250 MAD</option>
+                <option value="nettoyage">🧹 Nettoyage — 60–200 MAD</option>
+                <option value="peinture">🎨 Peinture — 150–500 MAD</option>
+                <option value="climatisation">❄️ Climatisation — 150–600 MAD</option>
+                <option value="jardinage">🌿 Jardinage — 80–300 MAD</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prestataire préféré</label>
+              <select class="form-select" id="bookingProvider" onchange="updateBookingSummary()">
+                <option value="">Recommandé par l'IA ✨</option>
+                <option value="karim">⚡ Karim Benali — 4.9⭐ — 150 MAD/h</option>
+                <option value="hassan">🔧 Hassan Moussaoui — 4.8⭐ — 120 MAD/h</option>
+                <option value="fatima">🧹 Fatima Zahraoui — 4.9⭐ — 80 MAD/h</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Urgence</label>
+              <div style="display:flex;gap:10px">
+                <label style="flex:1;cursor:pointer">
+                  <input type="radio" name="urgency" value="normal" checked style="accent-color:var(--g)"/> Normal (48h)
+                </label>
+                <label style="flex:1;cursor:pointer">
+                  <input type="radio" name="urgency" value="urgent" style="accent-color:var(--g)"/> 🔴 Urgent (+30%)
+                </label>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-block mt-16" onclick="nextBookingStep(2)">Continuer →</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="bookingStep2" style="display:none">
+          <div class="booking-form">
+            <div class="booking-form-title">2. Décrivez votre besoin</div>
+            <div class="form-group">
+              <label class="form-label">Description<span class="req">*</span></label>
+              <textarea class="form-input form-textarea" id="bookingDesc" placeholder="Décrivez votre problème en détail..." oninput="updateBookingSummary()"></textarea>
+              <div class="form-error" id="bookingDescErr">⚠️ Veuillez décrire votre besoin</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date souhaitée</label>
+              <input class="form-input" type="date" id="bookingDate" oninput="updateBookingSummary()"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Créneau horaire</label>
+              <select class="form-select" id="bookingTime">
+                <option>Matin (8h–12h)</option>
+                <option>Après-midi (13h–17h)</option>
+                <option>Soir (17h–20h)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Photos (optionnel)</label>
+              <div style="border:2px dashed var(--border);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:var(--tr)" onclick="showToast('📸 Sélection de fichiers simulée !','info')" onmouseenter="this.style.borderColor='var(--g)'" onmouseleave="this.style.borderColor='var(--border)'">
+                <div style="font-size:28px;margin-bottom:8px">📸</div>
+                <div style="font-size:13px;color:var(--text2)">Cliquer pour ajouter des photos</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:4px">JPG, PNG — max 5 photos</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-ghost" onclick="nextBookingStep(1)">← Retour</button>
+              <button class="btn btn-primary" style="flex:1" onclick="nextBookingStep(3)">Continuer →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="bookingStep3" style="display:none">
+          <div class="booking-form">
+            <div class="booking-form-title">3. Votre localisation</div>
+            <div class="map-placeholder" onclick="showToast('📍 GPS activé — Casablanca, Maarif détecté !','success')">
+              <div class="map-pin-anim">📍</div>
+            </div>
+            <div class="form-group mt-16">
+              <label class="form-label">Adresse<span class="req">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">📍</span>
+                <input class="form-input" type="text" placeholder="Ex: 45 Rue Ibn Rochd, Maarif, Casablanca" id="bookingAddress" value="Casablanca, Maarif"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ville</label>
+              <select class="form-select" id="bookingCity">
+                <option>Casablanca</option><option>Rabat</option><option>Marrakech</option><option>Fès</option><option>Tanger</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-ghost" onclick="nextBookingStep(2)">← Retour</button>
+              <button class="btn btn-primary" style="flex:1" onclick="nextBookingStep(4)">Continuer →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Payment -->
+        <div id="bookingStep4" style="display:none">
+          <div class="booking-form">
+            <div class="booking-form-title">4. Mode de paiement</div>
+            <div class="payment-methods">
+              <div class="payment-method selected" onclick="selectPayment(this)">
+                <div class="pm-icon">💵</div>
+                <div class="pm-info"><div class="pm-name">Cash à la livraison</div><div class="pm-desc">Payez en espèces après la prestation</div></div>
+                <div class="pm-radio"></div>
+              </div>
+              <div class="payment-method" onclick="selectPayment(this)">
+                <div class="pm-icon">💳</div>
+                <div class="pm-info"><div class="pm-name">Carte bancaire</div><div class="pm-desc">Paiement sécurisé via Stripe</div></div>
+                <div class="pm-radio"></div>
+              </div>
+              <div class="payment-method" onclick="selectPayment(this)">
+                <div class="pm-icon">📱</div>
+                <div class="pm-info"><div class="pm-name">Mobile Money</div><div class="pm-desc">Orange Money, Cash Plus...</div></div>
+                <div class="pm-radio"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Code promo</label>
+              <div style="display:flex;gap:8px">
+                <input class="form-input" type="text" placeholder="DARKI20" id="promoCode"/>
+                <button class="btn btn-outline" onclick="applyPromo()">Appliquer</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-ghost" onclick="nextBookingStep(3)">← Retour</button>
+              <button class="btn btn-primary" style="flex:1;font-size:15px" onclick="confirmBooking()">
+                ✅ Confirmer la réservation
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="booking-summary">
+        <div class="bs-title">📋 Récapitulatif</div>
+        <div class="bs-provider" id="bsSummary">
+          <div class="bs-prov-ava" style="background:rgba(34,197,94,.1)">🔧</div>
+          <div><div class="bs-prov-name" id="bsProviderName">Sélectionnez un service</div><div class="bs-prov-job" id="bsProviderJob">—</div></div>
+        </div>
+        <div class="bs-row"><div class="bs-label">Catégorie</div><div class="bs-val" id="bsCat">—</div></div>
+        <div class="bs-row"><div class="bs-label">Date</div><div class="bs-val" id="bsDate">—</div></div>
+        <div class="bs-row"><div class="bs-label">Adresse</div><div class="bs-val">Casablanca</div></div>
+        <div class="bs-row"><div class="bs-label">Durée estimée</div><div class="bs-val">1–3 heures</div></div>
+        <div class="bs-row"><div class="bs-label">Sous-total</div><div class="bs-val" id="bsSubtotal">—</div></div>
+        <div class="bs-row"><div class="bs-label">Réduction promo</div><div class="bs-val text-green" id="bsDiscount">—</div></div>
+        <div class="bs-total"><div>Total estimé</div><div class="bs-total-val" id="bsTotal">—</div></div>
+        <div style="margin-top:14px">
+          <div class="alert alert-info" style="font-size:12px;padding:10px 12px">🛡️ Garantie satisfaction ou remboursement complet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: CONTACT
+════════════════════════════════════ -->
+<div id="page-contact" class="page">
+  <div class="page-wrap">
+    <div class="sec-tag">📞 Contact</div>
+    <h1 class="sec-title">Nous contacter</h1>
+    <p class="sec-sub" style="margin-bottom:44px">Notre équipe est disponible 7j/7 de 8h à 22h.</p>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-card"><div class="cc-icon" style="background:rgba(34,197,94,.1)">📧</div><div><div class="cc-title">Email</div><div class="cc-val">contact@darkidigital.ma<br>support@darkidigital.ma</div></div></div>
+        <div class="contact-card"><div class="cc-icon" style="background:rgba(56,189,248,.1)">📱</div><div><div class="cc-title">Téléphone</div><div class="cc-val">+212 522 XXX XXX<br>+212 612 XXX XXX (WhatsApp)</div></div></div>
+        <div class="contact-card"><div class="cc-icon" style="background:rgba(251,191,36,.1)">📍</div><div><div class="cc-title">Adresse</div><div class="cc-val">123 Boulevard Mohammed V<br>Casablanca 20250, Maroc</div></div></div>
+        <div class="contact-card"><div class="cc-icon" style="background:rgba(168,85,247,.1)">⏰</div><div><div class="cc-title">Horaires</div><div class="cc-val">Lun–Sam : 8h00 – 22h00<br>Dimanche : 9h00 – 18h00</div></div></div>
+      </div>
+      <div class="contact-form-card">
+        <div class="contact-form-title">Envoyez-nous un message</div>
+        <div class="contact-form-sub">Réponse garantie sous 24h ouvrées.</div>
+        <form id="contactForm" onsubmit="submitContact(event)">
+          <div class="form-group">
+            <label class="form-label">Nom complet<span class="req">*</span></label>
+            <input class="form-input" id="contactName" type="text" placeholder="Votre nom"/>
+            <div class="form-error" id="contactNameErr">⚠️ Nom requis</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email<span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="input-icon">✉️</span>
+              <input class="form-input" id="contactEmail" type="email" placeholder="votre@email.com"/>
+            </div>
+            <div class="form-error" id="contactEmailErr">⚠️ Email invalide</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sujet<span class="req">*</span></label>
+            <select class="form-select" id="contactSubject">
+              <option value="">Choisir un sujet</option>
+              <option>Support technique</option>
+              <option>Problème de paiement</option>
+              <option>Devenir prestataire</option>
+              <option>Partenariat</option>
+              <option>Autre</option>
+            </select>
+            <div class="form-error" id="contactSubjectErr">⚠️ Sujet requis</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message<span class="req">*</span></label>
+            <textarea class="form-input form-textarea" id="contactMessage" placeholder="Décrivez votre demande..." style="min-height:120px"></textarea>
+            <div class="form-error" id="contactMessageErr">⚠️ Message requis</div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="contactSubmitBtn">
+            📤 Envoyer le message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: DASHBOARD (PROVIDER)
+════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <div class="page-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="sec-tag">🔧 Espace Prestataire</div>
+        <h1 class="sec-title" style="margin-bottom:0">Tableau de bord</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="avail-toggle">
+          <div class="toggle-track on" id="availToggle" onclick="toggleAvailability()"><div class="toggle-knob"></div></div>
+          <div class="avail-label" id="availLabel">🟢 Disponible</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('profile')">Mon profil →</button>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dash-kpi"><div class="dk-label">Revenus ce mois</div><div class="dk-value text-green">4 800 MAD</div><div class="dk-change dk-up">▲ +18% vs mois dernier</div></div>
+      <div class="dash-kpi"><div class="dk-label">Missions terminées</div><div class="dk-value">32</div><div class="dk-change dk-up">▲ +5 ce mois</div></div>
+      <div class="dash-kpi"><div class="dk-label">Note moyenne</div><div class="dk-value">4.9 ⭐</div><div class="dk-change" style="color:var(--text2)">Basé sur 28 avis</div></div>
+      <div class="dash-kpi"><div class="dk-label">Taux d'acceptation</div><div class="dk-value">94%</div><div class="dk-change dk-up">▲ +3%</div></div>
+    </div>
+
+    <div class="dashboard-bottom">
+      <div class="dash-section">
+        <div class="dash-section-title">📊 Revenus mensuels (MAD)</div>
+        <div class="chart-wrap">
+          <div class="chart-col" style="height:40%" title="Jan"></div>
+          <div class="chart-col" style="height:55%" title="Fév"></div>
+          <div class="chart-col" style="height:48%" title="Mar"></div>
+          <div class="chart-col" style="height:72%" title="Avr"></div>
+          <div class="chart-col" style="height:60%" title="Mai"></div>
+          <div class="chart-col" style="height:85%" title="Jun"></div>
+          <div class="chart-col" style="height:78%" title="Jul"></div>
+          <div class="chart-col" style="height:95%" title="Aoû"></div>
+          <div class="chart-col" style="height:100%" title="Sep"></div>
+          <div class="chart-col" style="height:80%" title="Oct"></div>
+          <div class="chart-col" style="height:100%" title="Nov"></div>
+          <div class="chart-col" style="height:45%;opacity:.4" title="Déc (en cours)"></div>
+        </div>
+      </div>
+      <div class="dash-section">
+        <div class="dash-section-title">📥 Nouvelles demandes</div>
+        <div class="request-item">
+          <div class="ri-icon" style="background:rgba(56,189,248,.1)">⚡</div>
+          <div class="ri-info"><div class="ri-name">Réparation prise</div><div class="ri-meta">📍 Maarif · 150 MAD</div></div>
+          <div class="ri-actions"><button class="ri-accept" onclick="acceptRequest(this)">✓</button><button class="ri-reject" onclick="rejectRequest(this)">✗</button></div>
+        </div>
+        <div class="request-item">
+          <div class="ri-icon" style="background:rgba(34,197,94,.1)">⚡</div>
+          <div class="ri-info"><div class="ri-name">Tableau électrique</div><div class="ri-meta">📍 Ain Diab · 300 MAD</div></div>
+          <div class="ri-actions"><button class="ri-accept" onclick="acceptRequest(this)">✓</button><button class="ri-reject" onclick="rejectRequest(this)">✗</button></div>
+        </div>
+        <div class="request-item">
+          <div class="ri-icon" style="background:rgba(251,191,36,.1)">⚡</div>
+          <div class="ri-info"><div class="ri-name">Prise murale</div><div class="ri-meta">📍 Hay Hassani · 100 MAD</div></div>
+          <div class="ri-actions"><button class="ri-accept" onclick="acceptRequest(this)">✓</button><button class="ri-reject" onclick="rejectRequest(this)">✗</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: ADMIN
+════════════════════════════════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div class="admin-logo"><div class="admin-logo-text">DARKI<span> ADMIN</span></div></div>
+      <div class="admin-menu-item active" onclick="setAdminTab('overview')"><span class="admin-menu-icon">📊</span> Vue générale</div>
+      <div class="admin-menu-item" onclick="setAdminTab('users')"><span class="admin-menu-icon">👥</span> Utilisateurs</div>
+      <div class="admin-menu-item" onclick="setAdminTab('providers')"><span class="admin-menu-icon">🔧</span> Prestataires</div>
+      <div class="admin-menu-item" onclick="setAdminTab('orders')"><span class="admin-menu-icon">📋</span> Demandes</div>
+      <div class="admin-menu-item" onclick="setAdminTab('revenue')"><span class="admin-menu-icon">💰</span> Revenus</div>
+      <div class="admin-menu-item" onclick="setAdminTab('settings')"><span class="admin-menu-icon">⚙️</span> Paramètres</div>
+      <div style="padding:20px;border-top:1px solid rgba(255,255,255,.08);margin-top:auto">
+        <div style="font-size:12px;color:rgba(255,255,255,.4)">Connecté en tant qu'</div>
+        <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8);margin-top:3px">Admin</div>
+        <button class="btn btn-ghost btn-sm mt-8" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.15);font-size:11px" onclick="navigate('home')">← Site public</button>
+      </div>
+    </div>
+    <div class="admin-content">
+      <div class="admin-topbar">
+        <div class="admin-page-title" id="adminPageTitle">Vue générale</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost btn-sm" onclick="showToast('📊 Export CSV en cours...','info')">📥 Exporter</button>
+          <button class="btn btn-primary btn-sm" onclick="navigate('home')">🌐 Site public</button>
+        </div>
+      </div>
+
+      <!-- Overview -->
+      <div id="adminTabOverview">
+        <div class="admin-kpis">
+          <div class="admin-kpi"><div class="akpi-label">Utilisateurs totaux</div><div class="akpi-val">50 248</div><div class="akpi-change akpi-up">▲ +12% ce mois</div></div>
+          <div class="admin-kpi"><div class="akpi-label">Prestataires actifs</div><div class="akpi-val">12 084</div><div class="akpi-change akpi-up">▲ +8%</div></div>
+          <div class="admin-kpi"><div class="akpi-label">Revenus (MAD)</div><div class="akpi-val">284 920</div><div class="akpi-change akpi-up">▲ +23%</div></div>
+          <div class="admin-kpi"><div class="akpi-label">Demandes ce mois</div><div class="akpi-val">8 432</div><div class="akpi-change akpi-down">▼ -2%</div></div>
+        </div>
+        <div class="admin-charts-row">
+          <div class="admin-chart-card"><div class="ac-title">Revenus mensuels (MAD)</div><div class="ac-bars"><div class="ac-bar" style="height:40%"></div><div class="ac-bar" style="height:55%"></div><div class="ac-bar" style="height:48%"></div><div class="ac-bar" style="height:72%"></div><div class="ac-bar" style="height:62%"></div><div class="ac-bar" style="height:88%"></div><div class="ac-bar" style="height:78%"></div><div class="ac-bar" style="height:95%"></div><div class="ac-bar" style="height:100%"></div><div class="ac-bar" style="height:82%"></div><div class="ac-bar" style="height:100%"></div><div class="ac-bar" style="height:45%;opacity:.4"></div></div></div>
+          <div class="admin-chart-card">
+            <div class="ac-title">Dernières transactions</div>
+            <div class="request-item"><div class="ri-icon" style="background:rgba(56,189,248,.1)">⚡</div><div class="ri-info"><div class="ri-name">Électricité — Casa</div><div class="ri-meta">150 MAD · Cash</div></div><div class="badge badge-green">OK</div></div>
+            <div class="request-item"><div class="ri-icon" style="background:rgba(34,197,94,.1)">🔧</div><div class="ri-info"><div class="ri-name">Plomberie — Rabat</div><div class="ri-meta">200 MAD · Stripe</div></div><div class="badge badge-green">OK</div></div>
+            <div class="request-item"><div class="ri-icon" style="background:rgba(248,113,113,.1)">🧹</div><div class="ri-info"><div class="ri-name">Nettoyage — Fès</div><div class="ri-meta">300 MAD · Cash</div></div><div class="badge badge-orange">En attente</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div id="adminTabUsers" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:14px;color:var(--text2)">50 248 utilisateurs inscrits</div>
+          <button class="btn btn-primary btn-sm" onclick="showToast('➕ Ajouter utilisateur — Bientôt','info')">+ Ajouter</button>
+        </div>
+        <div class="admin-table-card">
+          <table class="admin-table">
+            <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Ville</th><th>Inscrit le</th><th>Statut</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><div class="user-cell"><div class="user-ava-sm" style="background:var(--g)">M</div><div><div class="user-name-sm">Mohammed Alaoui</div><div class="user-email-sm">mohammed@example.com</div></div></div></td><td><div class="badge badge-blue">Client</div></td><td>Casablanca</td><td>10 Jan 2025</td><td><div class="badge badge-green">Actif</div></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('✅ Profil consulté','success')">Voir</button></td></tr>
+              <tr><td><div class="user-cell"><div class="user-ava-sm" style="background:var(--b)">K</div><div><div class="user-name-sm">Karim Benali</div><div class="user-email-sm">karim@example.com</div></div></div></td><td><div class="badge badge-orange">Prestataire</div></td><td>Casablanca</td><td>5 Jan 2025</td><td><div class="badge badge-green">Actif</div></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('✅ Profil consulté','success')">Voir</button></td></tr>
+              <tr><td><div class="user-cell"><div class="user-ava-sm" style="background:#A855F7">F</div><div><div class="user-name-sm">Fatima Zahraoui</div><div class="user-email-sm">fatima@example.com</div></div></div></td><td><div class="badge badge-orange">Prestataire</div></td><td>Marrakech</td><td>1 Jan 2025</td><td><div class="badge badge-green">Actif</div></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('✅ Profil consulté','success')">Voir</button></td></tr>
+              <tr><td><div class="user-cell"><div class="user-ava-sm" style="background:var(--err)">H</div><div><div class="user-name-sm">Hassan Moussaoui</div><div class="user-email-sm">hassan@example.com</div></div></div></td><td><div class="badge badge-orange">Prestataire</div></td><td>Rabat</td><td>15 Déc 2024</td><td><div class="badge badge-red">Suspendu</div></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('✅ Compte réactivé !','success')">Activer</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Other tabs placeholder -->
+      <div id="adminTabProviders" style="display:none"><div class="alert alert-info mt-16">🔧 Gestion des prestataires — Même structure que Utilisateurs avec approbation.</div></div>
+      <div id="adminTabOrders" style="display:none"><div class="alert alert-info mt-16">📋 Toutes les demandes de service avec statuts et suivi en temps réel.</div></div>
+      <div id="adminTabRevenue" style="display:none"><div class="alert alert-info mt-16">💰 Analyse financière — Commissions, virements prestataires, remboursements.</div></div>
+      <div id="adminTabSettings" style="display:none"><div class="alert alert-info mt-16">⚙️ Configuration de la plateforme, taux de commission, notifications système.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL: EDIT PROFILE
+════════════════════════════════════ -->
+<div class="overlay" id="editProfileModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Modifier le profil</div>
+      <div class="modal-close" onclick="closeModal('editProfileModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Prénom</label>
+        <input class="form-input" id="editFirstName" type="text" value="Mohammed"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nom</label>
+        <input class="form-input" id="editLastName" type="text" value="Alaoui"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ville</label>
+        <select class="form-select"><option>Casablanca</option><option>Rabat</option><option>Marrakech</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editProfileModal')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveProfile()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL: DELETE ACCOUNT
+════════════════════════════════════ -->
+<div class="overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--err)">⚠️ Supprimer le compte</div>
+      <div class="modal-close" onclick="closeModal('deleteModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error">Cette action est irréversible. Toutes vos données seront supprimées définitivement.</div>
+      <div class="form-group">
+        <label class="form-label">Tapez <strong>SUPPRIMER</strong> pour confirmer</label>
+        <input class="form-input" id="deleteConfirmInput" type="text" placeholder="SUPPRIMER"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Annuler</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">🗑️ Supprimer définitivement</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     JAVASCRIPT ENGINE
+════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────────────
+   APP STATE
+───────────────────────────────────────────────── */
+const APP = {
+  currentPage: 'home',
+  prevPage: null,
+  isDark: false,
+  isLoggedIn: false,
+  user: null,
+  bookingStep: 1,
+  isAvailable: true,
+  promoApplied: false,
+};
+
+// Simulated users DB
+const USERS_DB = [
+  { email: 'admin@darki.ma', password: 'admin123', name: 'Admin DARKI', role: 'admin' },
+  { email: 'demo@darki.ma',  password: 'demo1234', name: 'Mohammed Alaoui', role: 'customer' },
+  { email: 'pro@darki.ma',   password: 'pro12345', name: 'Karim Benali', role: 'provider' },
+];
+
+/* ─────────────────────────────────────────────────
+   NAVIGATION ENGINE
+───────────────────────────────────────────────── */
+function navigate(page) {
+  if (APP.currentPage === page) return;
+
+  // Guard: protected pages require login
+  const protected_pages = ['profile', 'booking', 'dashboard'];
+  if (protected_pages.includes(page) && !APP.isLoggedIn) {
+    showToast('🔐 Veuillez vous connecter d\'abord', 'error');
+    navigate('login');
+    return;
+  }
+  // Admin page
+  if (page === 'admin' && !APP.isLoggedIn) {
+    showToast('🔐 Accès administrateur requis', 'error');
+    navigate('login');
+    return;
+  }
+
+  const outEl = document.getElementById('page-' + APP.currentPage);
+  const inEl  = document.getElementById('page-' + page);
+  if (!inEl) { showToast('Page introuvable', 'error'); return; }
+
+  // Exit animation
+  if (outEl) {
+    outEl.classList.add('exit');
+    setTimeout(() => {
+      outEl.classList.remove('active', 'exit');
+      outEl.style.display = 'none';
+    }, 220);
+  }
+
+  // Enter
+  setTimeout(() => {
+    inEl.style.display = '';
+    requestAnimationFrame(() => {
+      inEl.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }, 80);
+
+  APP.prevPage = APP.currentPage;
+  APP.currentPage = page;
+
+  // Update nav active links
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.page === page);
+  });
+  document.querySelectorAll('.mobile-link').forEach(l => {
+    l.classList.remove('active');
+  });
+
+  closeMobileMenu();
+}
+
+/* ─────────────────────────────────────────────────
+   TOAST SYSTEM
+───────────────────────────────────────────────── */
+function showToast(msg, type = 'success') {
+  const icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type]||'💬'}</span>
+    <span style="flex:1">${msg}</span>
+    <span class="toast-close" onclick="removeToast(this.parentElement)">✕</span>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => removeToast(toast), 3800);
+}
+function removeToast(el) {
+  if (!el || el.classList.contains('removing')) return;
+  el.classList.add('removing');
+  setTimeout(() => el.remove(), 250);
+}
+
+/* ─────────────────────────────────────────────────
+   LOADING
+───────────────────────────────────────────────── */
+function showLoading(text = 'Chargement...') {
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+function simulateAsync(text, ms, cb) {
+  showLoading(text);
+  setTimeout(() => { hideLoading(); if(cb) cb(); }, ms);
+}
+
+/* ─────────────────────────────────────────────────
+   THEME
+───────────────────────────────────────────────── */
+function toggleTheme() {
+  APP.isDark = !APP.isDark;
+  document.documentElement.toggleAttribute('data-dark', APP.isDark);
+  document.getElementById('themeBtn').textContent = APP.isDark ? '☀️' : '🌙';
+  const lbl = document.getElementById('themeLabel');
+  if(lbl) lbl.textContent = APP.isDark ? 'Mode sombre' : 'Mode clair';
+  showToast(APP.isDark ? '🌙 Mode sombre activé' : '☀️ Mode clair activé', 'info');
+}
+document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+
+/* ─────────────────────────────────────────────────
+   MOBILE MENU
+───────────────────────────────────────────────── */
+function toggleMobileMenu() {
+  const mm = document.getElementById('mobileMenu');
+  mm.classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.hamburger') && !e.target.closest('.mobile-menu')) closeMobileMenu();
+});
+
+/* ─────────────────────────────────────────────────
+   AUTH SYSTEM
+───────────────────────────────────────────────── */
+function setLoggedIn(user) {
+  APP.isLoggedIn = true;
+  APP.user = user;
+  const initial = user.name.charAt(0).toUpperCase();
+  // Nav
+  document.getElementById('navGuest').style.display = 'none';
+  document.getElementById('navUser').classList.add('visible');
+  document.getElementById('navUsername').textContent = user.name.split(' ')[0];
+  document.getElementById('navAvatarBtn').textContent = initial;
+  document.getElementById('navAvatarBtn').onclick = () => navigate('profile');
+  // Mobile menu
+  document.getElementById('mobileGuest').style.display = 'none';
+  document.getElementById('mobileLoggedIn').style.display = 'block';
+  // Profile page
+  document.getElementById('profileNameDisplay').textContent = user.name;
+  document.getElementById('profileEmailDisplay').textContent = user.email;
+  document.getElementById('profileAvaLetter').textContent = initial;
+  document.getElementById('pInfoName').textContent = user.name;
+  document.getElementById('pInfoEmail').textContent = user.email;
+}
+
+function logout() {
+  APP.isLoggedIn = false;
+  APP.user = null;
+  document.getElementById('navGuest').style.display = 'flex';
+  document.getElementById('navUser').classList.remove('visible');
+  document.getElementById('mobileGuest').style.display = 'block';
+  document.getElementById('mobileLoggedIn').style.display = 'none';
+  showToast('👋 Déconnexion réussie', 'info');
+  navigate('home');
+}
+
+/* ─────────────────────────────────────────────────
+   LOGIN FORM
+───────────────────────────────────────────────── */
+function submitLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  let valid = true;
+
+  // Reset
+  ['loginEmail','loginPassword'].forEach(id => {
+    document.getElementById(id).classList.remove('error','success');
+  });
+  ['loginEmailErr','loginPasswordErr'].forEach(id => {
+    document.getElementById(id).classList.remove('show');
+  });
+
+  // Validate email
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('loginEmail').classList.add('error');
+    document.getElementById('loginEmailErr').classList.add('show');
+    valid = false;
+  } else {
+    document.getElementById('loginEmail').classList.add('success');
+  }
+  // Validate password
+  if (!pass || pass.length < 6) {
+    document.getElementById('loginPassword').classList.add('error');
+    document.getElementById('loginPasswordErr').textContent = '⚠️ Minimum 6 caractères requis';
+    document.getElementById('loginPasswordErr').classList.add('show');
+    valid = false;
+  }
+  if (!valid) return;
+
+  // Simulate API call
+  const btn = document.getElementById('loginSubmitBtn');
+  btn.innerHTML = '<span class="spinner"></span> Connexion...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.innerHTML = 'Se connecter';
+    btn.disabled = false;
+
+    // Check credentials
+    const found = USERS_DB.find(u => u.email === email && u.password === pass);
+    if (found) {
+      setLoggedIn(found);
+      showToast(`🎉 Bienvenue ${found.name} !`, 'success');
+      // Role-based redirect
+      if (found.role === 'admin') navigate('admin');
+      else if (found.role === 'provider') navigate('dashboard');
+      else navigate('home');
+      // Clear form
+      document.getElementById('loginForm').reset();
+    } else {
+      const alert = document.getElementById('loginAlert');
+      alert.style.display = 'block';
+      alert.innerHTML = '<div class="alert alert-error">❌ Email ou mot de passe incorrect. Essayez: demo@darki.ma / demo1234</div>';
+      document.getElementById('loginPassword').classList.add('error');
+    }
+  }, 1200);
+}
+
+/* ─────────────────────────────────────────────────
+   REGISTER FORM
+───────────────────────────────────────────────── */
+function submitRegister(e) {
+  e.preventDefault();
+  const firstName = document.getElementById('regFirstName').value.trim();
+  const email     = document.getElementById('regEmail').value.trim();
+  const phone     = document.getElementById('regPhone').value.trim();
+  const pass      = document.getElementById('regPassword').value;
+  const confirm   = document.getElementById('regConfirm').value;
+  const terms     = document.getElementById('regTerms').checked;
+  let valid = true;
+
+  // Reset all errors
+  ['regFirstName','regEmail','regPhone','regPassword','regConfirm'].forEach(id => {
+    document.getElementById(id).classList.remove('error','success');
+  });
+  ['regFirstNameErr','regEmailErr','regPhoneErr','regPasswordErr','regConfirmErr','regTermsErr'].forEach(id => {
+    document.getElementById(id).classList.remove('show');
+  });
+
+  if (!firstName) {
+    document.getElementById('regFirstName').classList.add('error');
+    document.getElementById('regFirstNameErr').classList.add('show');
+    valid = false;
+  } else document.getElementById('regFirstName').classList.add('success');
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('regEmail').classList.add('error');
+    document.getElementById('regEmailErr').classList.add('show');
+    valid = false;
+  } else document.getElementById('regEmail').classList.add('success');
+
+  if (!phone || phone.length < 10) {
+    document.getElementById('regPhone').classList.add('error');
+    document.getElementById('regPhoneErr').classList.add('show');
+    valid = false;
+  } else document.getElementById('regPhone').classList.add('success');
+
+  if (!pass || pass.length < 8) {
+    document.getElementById('regPassword').classList.add('error');
+    document.getElementById('regPasswordErr').classList.add('show');
+    valid = false;
+  } else document.getElementById('regPassword').classList.add('success');
+
+  if (pass !== confirm) {
+    document.getElementById('regConfirm').classList.add('error');
+    document.getElementById('regConfirmErr').classList.add('show');
+    valid = false;
+  } else if (confirm) document.getElementById('regConfirm').classList.add('success');
+
+  if (!terms) {
+    document.getElementById('regTermsErr').classList.add('show');
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  const btn = document.getElementById('regSubmitBtn');
+  btn.innerHTML = '<span class="spinner"></span> Création du compte...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.innerHTML = 'Créer mon compte';
+    btn.disabled = false;
+    const role = document.getElementById('regRole').value;
+    const newUser = { email, password: pass, name: firstName + ' ' + document.getElementById('regLastName').value, role };
+    setLoggedIn(newUser);
+    showToast('🎉 Compte créé avec succès ! Bienvenue !', 'success');
+    document.getElementById('registerForm').reset();
+    if (role === 'provider') navigate('dashboard');
+    else navigate('home');
+  }, 1400);
+}
+
+/* ─────────────────────────────────────────────────
+   PASSWORD STRENGTH
+───────────────────────────────────────────────── */
+function checkStrength(val) {
+  const fill  = document.getElementById('strengthFill');
+  const label = document.getElementById('strengthLabel');
+  let score = 0;
+  if (val.length >= 8)  score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const configs = [
+    { w:'0%',   bg:'transparent',   t:'Entrez votre mot de passe' },
+    { w:'25%',  bg:'var(--err)',     t:'Faible 🔴' },
+    { w:'50%',  bg:'var(--warn)',    t:'Moyen 🟡' },
+    { w:'75%',  bg:'#60A5FA',        t:'Bon 🔵' },
+    { w:'100%', bg:'var(--ok)',      t:'Très fort 🟢' },
+  ];
+  const c = configs[score] || configs[0];
+  fill.style.width = c.w;
+  fill.style.background = c.bg;
+  label.textContent = c.t;
+}
+
+/* ─────────────────────────────────────────────────
+   PASSWORD TOGGLE
+───────────────────────────────────────────────── */
+function togglePwd(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁️'; }
+}
+
+/* ─────────────────────────────────────────────────
+   SERVICES FILTER
+───────────────────────────────────────────────── */
+function setFilter(chip, cat) {
+  document.querySelectorAll('#servicesFilters .filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  const cards = document.querySelectorAll('#servicesGrid .service-card');
+  cards.forEach(card => {
+    const show = cat === 'tous' || card.dataset.cat === cat;
+    card.style.display = show ? '' : 'none';
+    if (show) card.style.animation = 'pageIn .3s ease both';
+  });
+}
+function filterServices(cat) {
+  navigate('services');
+  setTimeout(() => {
+    const chip = document.querySelector(`[onclick*="setFilter(this,'${cat}')"]`);
+    if (chip) { setFilter(chip, cat); }
+  }, 200);
+}
+function filterServiceCards() {
+  const q = document.getElementById('serviceSearchInput').value.toLowerCase();
+  document.querySelectorAll('#servicesGrid .service-card').forEach(card => {
+    const txt = card.querySelector('.service-name').textContent.toLowerCase()
+              + card.querySelector('.service-desc').textContent.toLowerCase();
+    card.style.display = txt.includes(q) ? '' : 'none';
+  });
+}
+
+/* ─────────────────────────────────────────────────
+   BOOKING FLOW
+───────────────────────────────────────────────── */
+function nextBookingStep(step) {
+  // Validate step 2
+  if (APP.bookingStep === 2 && step === 3) {
+    const desc = document.getElementById('bookingDesc').value.trim();
+    if (!desc) {
+      document.getElementById('bookingDesc').classList.add('error');
+      document.getElementById('bookingDescErr').classList.add('show');
+      return;
+    }
+    document.getElementById('bookingDesc').classList.remove('error');
+    document.getElementById('bookingDescErr').classList.remove('show');
+  }
+  // Hide all steps
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('bookingStep' + i);
+    if (el) el.style.display = 'none';
+  }
+  // Show target
+  const target = document.getElementById('bookingStep' + step);
+  if (target) {
+    target.style.display = 'block';
+    target.style.animation = 'pageIn .3s ease both';
+  }
+  // Update step indicators
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('bstep' + i);
+    if (!el) continue;
+    el.classList.remove('active', 'done');
+    if (i < step) el.classList.add('done');
+    else if (i === step) el.classList.add('active');
+  }
+  APP.bookingStep = step;
+}
+
+function updateBookingSummary() {
+  const catVal  = document.getElementById('bookingCat').value;
+  const provVal = document.getElementById('bookingProvider').value;
+  const dateVal = document.getElementById('bookingDate').value;
+
+  const catLabels = { electricite:'⚡ Électricité', plomberie:'🔧 Plomberie', nettoyage:'🧹 Nettoyage', peinture:'🎨 Peinture', climatisation:'❄️ Climatisation', jardinage:'🌿 Jardinage' };
+  const provLabels = { karim:'Karim Benali', hassan:'Hassan Moussaoui', fatima:'Fatima Zahraoui' };
+  const prices = { electricite:150, plomberie:120, nettoyage:80, peinture:130, climatisation:200, jardinage:90 };
+
+  document.getElementById('bsCat').textContent = catLabels[catVal] || '—';
+  document.getElementById('bsDate').textContent = dateVal || '—';
+  document.getElementById('bsProviderName').textContent = provVal ? (provLabels[provVal] || 'IA recommandé') : 'IA Recommandé ✨';
+  document.getElementById('bsProviderJob').textContent = catLabels[catVal] || '—';
+
+  const price = prices[catVal];
+  if (price) {
+    document.getElementById('bsSubtotal').textContent = price + ' MAD';
+    const disc = APP.promoApplied ? Math.round(price * .2) : 0;
+    document.getElementById('bsDiscount').textContent = disc ? '-' + disc + ' MAD' : '—';
+    document.getElementById('bsTotal').textContent = (price - disc) + ' MAD';
+  } else {
+    ['bsSubtotal','bsDiscount','bsTotal'].forEach(id => document.getElementById(id).textContent = '—');
+  }
+}
+
+function selectPayment(el) {
+  document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function applyPromo() {
+  const code = document.getElementById('promoCode').value.trim().toUpperCase();
+  if (code === 'DARKI20') {
+    APP.promoApplied = true;
+    showToast('🎁 Code DARKI20 appliqué ! -20% sur votre commande', 'success');
+    updateBookingSummary();
+  } else if (code === '') {
+    showToast('⚠️ Entrez un code promo', 'warning');
+  } else {
+    showToast('❌ Code promo invalide', 'error');
+  }
+}
+
+function confirmBooking() {
+  const cat = document.getElementById('bookingCat').value;
+  if (!cat) { showToast('⚠️ Sélectionnez un service', 'error'); nextBookingStep(1); return; }
+  simulateAsync('⏳ Confirmation de la réservation...', 1600, () => {
+    showToast('✅ Réservation confirmée ! Le prestataire sera notifié.', 'success');
+    navigate('profile');
+    setTimeout(() => showProfileTab('orders'), 300);
+  });
+}
+
+/* ─────────────────────────────────────────────────
+   CONTACT FORM
+───────────────────────────────────────────────── */
+function submitContact(e) {
+  e.preventDefault();
+  const name    = document.getElementById('contactName').value.trim();
+  const email   = document.getElementById('contactEmail').value.trim();
+  const subject = document.getElementById('contactSubject').value;
+  const msg     = document.getElementById('contactMessage').value.trim();
+  let valid = true;
+
+  ['contactName','contactEmail','contactMessage'].forEach(id => document.getElementById(id).classList.remove('error','success'));
+  ['contactNameErr','contactEmailErr','contactSubjectErr','contactMessageErr'].forEach(id => document.getElementById(id).classList.remove('show'));
+
+  if (!name) { document.getElementById('contactName').classList.add('error'); document.getElementById('contactNameErr').classList.add('show'); valid = false; }
+  else document.getElementById('contactName').classList.add('success');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('contactEmail').classList.add('error'); document.getElementById('contactEmailErr').classList.add('show'); valid = false; }
+  else document.getElementById('contactEmail').classList.add('success');
+  if (!subject) { document.getElementById('contactSubjectErr').classList.add('show'); valid = false; }
+  if (!msg) { document.getElementById('contactMessage').classList.add('error'); document.getElementById('contactMessageErr').classList.add('show'); valid = false; }
+  else document.getElementById('contactMessage').classList.add('success');
+
+  if (!valid) return;
+
+  const btn = document.getElementById('contactSubmitBtn');
+  btn.innerHTML = '<span class="spinner"></span> Envoi...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.innerHTML = '📤 Envoyer le message';
+    btn.disabled = false;
+    document.getElementById('contactForm').reset();
+    showToast('📧 Message envoyé ! Nous vous répondrons sous 24h.', 'success');
+  }, 1200);
+}
+
+/* ─────────────────────────────────────────────────
+   PROFILE TABS
+───────────────────────────────────────────────── */
+function showProfileTab(tab) {
+  ['info','orders','payments','settings'].forEach(t => {
+    const el = document.getElementById('profileTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+  // Update menu
+  document.querySelectorAll('.pmenu-item').forEach((item, i) => {
+    item.classList.remove('active-menu');
+  });
+}
+
+/* ─────────────────────────────────────────────────
+   EDIT PROFILE MODAL
+───────────────────────────────────────────────── */
+function openEditProfile() { openModal('editProfileModal'); }
+function saveProfile() {
+  const fn = document.getElementById('editFirstName').value.trim();
+  const ln = document.getElementById('editLastName').value.trim();
+  const name = fn + ' ' + ln;
+  document.getElementById('profileNameDisplay').textContent = name;
+  document.getElementById('pInfoName').textContent = name;
+  document.getElementById('navUsername').textContent = fn;
+  document.getElementById('navAvatarBtn').textContent = fn.charAt(0).toUpperCase();
+  document.getElementById('profileAvaLetter').textContent = fn.charAt(0).toUpperCase();
+  closeModal('editProfileModal');
+  showToast('✅ Profil mis à jour avec succès !', 'success');
+}
+
+/* ─────────────────────────────────────────────────
+   DELETE ACCOUNT MODAL
+───────────────────────────────────────────────── */
+function showDeleteModal() { openModal('deleteModal'); }
+function confirmDelete() {
+  const val = document.getElementById('deleteConfirmInput').value;
+  if (val !== 'SUPPRIMER') { showToast('⚠️ Tapez exactement SUPPRIMER', 'error'); return; }
+  closeModal('deleteModal');
+  simulateAsync('Suppression du compte...', 1000, () => {
+    logout();
+    showToast('🗑️ Compte supprimé définitivement.', 'info');
+  });
+}
+
+/* ─────────────────────────────────────────────────
+   MODAL HELPERS
+───────────────────────────────────────────────── */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+/* ─────────────────────────────────────────────────
+   SOCIAL AUTH SIMULATION
+───────────────────────────────────────────────── */
+function loginWithGoogle() {
+  simulateAsync('🌐 Connexion Google...', 1200, () => {
+    const user = { email: 'user@gmail.com', name: 'Google User', role: 'customer' };
+    setLoggedIn(user);
+    showToast('🌐 Connecté via Google !', 'success');
+    navigate('home');
+  });
+}
+function loginWithPhone() {
+  showToast('📱 OTP envoyé au +212 6XX XXX XXX (simulation)', 'info');
+  setTimeout(() => { showToast('✅ OTP vérifié — Connexion réussie !', 'success'); }, 1500);
+  setTimeout(() => {
+    const user = { email: 'phone@user.ma', name: 'Utilisateur Phone', role: 'customer' };
+    setLoggedIn(user);
+    navigate('home');
+  }, 2500);
+}
+
+/* ─────────────────────────────────────────────────
+   PROVIDER DASHBOARD
+───────────────────────────────────────────────── */
+function toggleAvailability() {
+  APP.isAvailable = !APP.isAvailable;
+  const t = document.getElementById('availToggle');
+  const l = document.getElementById('availLabel');
+  t.classList.toggle('on', APP.isAvailable);
+  l.textContent = APP.isAvailable ? '🟢 Disponible' : '🔴 Hors ligne';
+  showToast(APP.isAvailable ? '🟢 Vous êtes maintenant disponible' : '🔴 Vous êtes hors ligne', 'info');
+}
+function acceptRequest(btn) {
+  const item = btn.closest('.request-item');
+  item.style.opacity = '0.5';
+  setTimeout(() => item.remove(), 300);
+  showToast('✅ Demande acceptée ! Le client est notifié.', 'success');
+}
+function rejectRequest(btn) {
+  const item = btn.closest('.request-item');
+  item.style.opacity = '0.4';
+  setTimeout(() => item.remove(), 300);
+  showToast('❌ Demande refusée.', 'info');
+}
+
+/* ─────────────────────────────────────────────────
+   ADMIN TABS
+───────────────────────────────────────────────── */
+function setAdminTab(tab) {
+  const tabs = ['overview','users','providers','orders','revenue','settings'];
+  tabs.forEach(t => {
+    const el = document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.admin-menu-item').forEach((item, i) => {
+    item.classList.toggle('active', tabs[i] === tab);
+  });
+  const titles = { overview:'Vue générale', users:'Utilisateurs', providers:'Prestataires', orders:'Demandes', revenue:'Revenus', settings:'Paramètres' };
+  document.getElementById('adminPageTitle').textContent = titles[tab] || tab;
+}
+
+/* ─────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────── */
+// Pre-fill booking date
+(function() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const iso = d.toISOString().split('T')[0];
+  const el = document.getElementById('bookingDate');
+  if (el) { el.value = iso; el.min = iso; }
+  document.getElementById('bsDate').textContent = iso;
+})();
+
+// Init booking summary
+updateBookingSummary();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.overlay.open').forEach(m => m.classList.remove('open'));
+    closeMobileMenu();
+  }
+});
+
+console.log('%cDARKI SERVICES — App initialisée ✅', 'color:#22C55E;font-size:14px;font-weight:700');
+console.log('%cComptes de test:\n  demo@darki.ma / demo1234  (Client)\n  pro@darki.ma / pro12345   (Prestataire)\n  admin@darki.ma / admin123 (Admin)', 'color:#94A3B8');
+</script>
+</body>
+</html>
